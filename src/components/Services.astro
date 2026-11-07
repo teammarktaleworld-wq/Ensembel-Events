@@ -1,0 +1,79 @@
+---
+import { serviceGroups } from '../data/site';
+import { byId } from '../data/media';
+import Tile from './Tile.astro';
+---
+
+<section id="services" class="relative py-20 sm:py-28" aria-labelledby="services-title">
+  <div class="wrap">
+    <div class="text-center">
+      <p class="eyebrow justify-center" data-reveal>What we do</p>
+      <h2 id="services-title" class="h2 mt-4" data-split>Twelve services. <em>One</em> team.</h2>
+    </div>
+
+    <div class="panels mt-12" data-reveal>
+      {serviceGroups.map((g, i) => (
+        <article class={`panel${i === 0 ? ' is-open' : ''}`} data-cat={g.cat}>
+          <div class="panel-media"><Tile m={byId[g.media]} sizes="(min-width: 1024px) 60vw, 100vw" /></div>
+          <div class="panel-shade" aria-hidden="true"></div>
+          <button type="button" id={`panel-btn-${i}`} class="panel-hit" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`panel-${i}`}>
+            <span class="panel-num">0{i + 1}</span>
+            <span class="panel-vtitle">{g.title}</span>
+            <span class="panel-plus" aria-hidden="true"></span>
+          </button>
+          <div id={`panel-${i}`} class="panel-body" role="region" aria-labelledby={`panel-btn-${i}`}>
+            <h3 class="panel-title">{g.title}</h3>
+            <ul class="mt-4 flex flex-wrap gap-2">
+              {g.items.map((it) => <li class="panel-chip">{it}</li>)}
+            </ul>
+            <button type="button" class="panel-cta" data-open-enquiry data-type={g.items[0]}>
+              Plan one with us
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .panels { display: flex; flex-direction: column; gap: 10px; }
+  .panel {
+    position: relative; overflow: hidden; border-radius: 20px; background: #111; color: #fff; height: 5.25rem;
+    transition: height 0.7s var(--ease-out);
+  }
+  .panel.is-open { height: 25rem; }
+  .panel-media { position: absolute; inset: 0; }
+  .panel-media :global(.media-fit) { transform: scale(1.08); transition: transform 1.2s var(--ease-out); }
+  .panel.is-open .panel-media :global(.media-fit) { transform: scale(1); }
+  .panel-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.25) 40%, rgb(0 0 0 / 0.75)); }
+  .panel-hit { position: relative; z-index: 1; display: flex; align-items: center; gap: 1rem; width: 100%; height: 5.25rem; padding: 0 1.25rem; text-align: left; }
+  .panel-num { font-size: 0.8rem; font-weight: 600; color: var(--accent); }
+  .panel-vtitle { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; }
+  .panel-plus { position: relative; margin-left: auto; width: 1.1rem; height: 1.1rem; }
+  .panel-plus::before, .panel-plus::after { content: ''; position: absolute; inset: 50% 0 auto; height: 1.5px; background: currentColor; transition: transform 0.4s var(--ease-out); }
+  .panel-plus::after { transform: rotate(90deg); }
+  .panel.is-open .panel-plus::after { transform: rotate(0deg); }
+  .panel-body {
+    position: absolute; inset: auto 0 0 0; z-index: 2; padding: 1.25rem; visibility: hidden; opacity: 0; transform: translateY(14px);
+    transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out), visibility 0s 0.5s;
+  }
+  .panel.is-open .panel-body { visibility: visible; opacity: 1; transform: none; transition-delay: 0.2s, 0.2s, 0s; }
+  .panel-title { display: none; font-size: clamp(2rem, 3.4vw, 3.25rem); }
+  .panel-chip { padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.3); background: rgb(255 255 255 / 0.12); font-size: 0.9rem; backdrop-filter: blur(6px); }
+  .panel-cta { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; margin-top: 1rem; font-weight: 600; color: var(--accent); }
+
+  @media (min-width: 1024px) {
+    .panels { flex-direction: row; height: min(70svh, 620px); }
+    .panel, .panel.is-open { height: auto; }
+    .panel { flex: 1 1 0; min-width: 0; transition: flex-grow 0.8s var(--ease-out); }
+    .panel.is-open { flex-grow: 3.6; }
+    .panel-hit { position: absolute; inset: 0; height: auto; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 1.5rem; }
+    .panel-vtitle { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 1.6rem; white-space: nowrap; transition: opacity 0.4s; }
+    .panel.is-open .panel-vtitle { opacity: 0; }
+    .panel-plus { position: absolute; top: 1.6rem; right: 1.5rem; }
+    .panel-body { padding: 2rem; }
+    .panel-title { display: block; }
+  }
+</style>

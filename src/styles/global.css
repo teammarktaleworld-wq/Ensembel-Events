@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter-tight';
+@import '@fontsource-variable/inter';
+
+/* Registered so category switches animate the accent smoothly. */
+@property --accent { syntax: '<color>'; inherits: true; initial-value: #e3a81c; }
+@property --accent-ink { syntax: '<color>'; inherits: true; initial-value: #8a5d00; }
+@property --accent-soft { syntax: '<color>'; inherits: true; initial-value: #f7e3ad; }
+
+@theme {
+  --color-paper: #faf8f4;
+  --color-paper-2: #f2eee6;
+  --color-ink: #141416;
+  --color-ink-2: #2a2a2e;
+  --color-gold: #e3a81c;
+  --color-line: #e4dfd5;
+  --font-display: 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+}
+
+/* Category palettes. Ink shades keep at least 4.5:1 contrast on paper. */
+html {
+  --accent: #e3a81c; --accent-ink: #8a5d00; --accent-soft: #f7e3ad;
+  transition: --accent 0.8s var(--ease-out), --accent-ink 0.8s var(--ease-out), --accent-soft 0.8s var(--ease-out);
+}
+html[data-cat='conf'] { --accent: #3b7bf0; --accent-ink: #1d4fc4; --accent-soft: #d9e5ff; }
+html[data-cat='awards'] { --accent: #e5484d; --accent-ink: #b4232f; --accent-soft: #ffdcdd; }
+html[data-cat='launch'] { --accent: #12a57f; --accent-ink: #0b7a5f; --accent-soft: #d3f3e7; }
+html[data-cat='live'] { --accent: #8f63f5; --accent-ink: #6a3cd6; --accent-soft: #e9e0ff; }
+
+@layer base {
+  html { background: var(--color-paper); color: var(--color-ink); -webkit-text-size-adjust: 100%; }
+  body { font-family: var(--font-sans); font-size: 1.0625rem; line-height: 1.6; overflow-x: clip; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.025em; line-height: 1.04; text-wrap: balance; }
+  h1 em, h2 em { font-style: normal; color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  ::selection { background: var(--accent-soft); color: var(--color-ink); }
+  img, video { display: block; }
+  button { cursor: pointer; }
+}
+
+@layer components {
+  .wrap { width: 100%; max-width: 1440px; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 3rem); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 0.75rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: rgb(20 20 22 / 0.62); }
+  .eyebrow::before { content: ''; width: 1.75rem; height: 1px; background: var(--accent); }
+  .h2 { font-size: clamp(2.25rem, 5.4vw, 4.75rem); }
+  .btn-accent {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; min-height: 3rem; padding: 0 1.4rem; border-radius: 999px;
+    background: var(--accent); color: var(--color-ink); font-weight: 600; font-size: 0.95rem; white-space: nowrap;
+    box-shadow: 0 10px 30px -14px var(--accent);
+    transition: transform 0.3s var(--ease-out), filter 0.3s;
+  }
+  .btn-accent:hover { filter: brightness(1.08); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; min-height: 3rem; padding: 0 1.25rem; border-radius: 999px;
+    border: 1px solid rgb(20 20 22 / 0.14); background: rgb(255 255 255 / 0.7); font-weight: 500; font-size: 0.95rem; white-space: nowrap; backdrop-filter: blur(8px);
+    transition: border-color 0.3s, background-color 0.3s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0 1.1rem; border-radius: 999px;
+    border: 1px solid rgb(20 20 22 / 0.12); background: rgb(255 255 255 / 0.75); font-size: 0.92rem; font-weight: 500; white-space: nowrap;
+    transition: background-color 0.35s var(--ease-out), border-color 0.35s, color 0.35s;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed='true'] { background: var(--color-ink); border-color: var(--color-ink); color: #fff; }
+  .chip .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: currentColor; opacity: 0.35; }
+  .chip[aria-pressed='true'] .dot { background: var(--accent); opacity: 1; }
+  /* Category chips: one swipeable row on phones, wrapped and centred from 640px. */
+  .chip-row {
+    display: flex; gap: 0.5rem; max-width: 100%; overflow-x: auto; padding: 2px; scrollbar-width: none;
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+  @media (min-width: 640px) { .chip-row { flex-wrap: wrap; justify-content: center; overflow: visible; mask-image: none; } }
+  .link-underline { position: relative; display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 500; }
+  .link-underline::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0.6rem; height: 1px; background: currentColor;
+    transform: scaleX(0); transform-origin: left; transition: transform 0.5s var(--ease-out);
+  }
+  .link-underline:hover::after, .link-underline:focus-visible::after { transform: scaleX(1); }
+  .card { background: rgb(255 255 255 / 0.78); border: 1px solid var(--color-line); border-radius: 22px; backdrop-filter: blur(10px); }
+  .media-fit { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+.line-mask { display: block; overflow: hidden; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+
+/* Content is hidden for reveals only when JS runs and motion is allowed. */
+.js-motion [data-reveal] { opacity: 0; transform: translateY(28px); }
+.js-motion [data-split] { visibility: hidden; }
+.js-motion .hero-line { transform: translateY(110%); }
+.js-motion .hero-fade { opacity: 0; transform: translateY(16px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+}

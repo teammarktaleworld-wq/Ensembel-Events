@@ -1,0 +1,96 @@
+---
+import { categories, wall } from '../data/site';
+import { byId } from '../data/media';
+import Tile from './Tile.astro';
+const slots = wall.all.map((id) => byId[id]);
+const sizes = '(min-width: 1024px) 34vw, (min-width: 768px) 33vw, 50vw';
+const play = '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z" fill="currentColor"/></svg>';
+---
+
+<section id="top" class="hero relative overflow-x-clip pt-[5.25rem]" aria-labelledby="hero-title">
+  <div class="wrap">
+    <div id="wall" class="wall">
+      {slots.map((m, i) => (
+        <button type="button" class={`tile s${i}`} data-slot={i} data-id={m.id} aria-label={`View: ${m.caption}`}>
+          <span class="tile-inner"><Tile m={m} eager={i < 3} sizes={sizes} /></span>
+          <span class="tile-badge" hidden={m.type !== 'video'}><span set:html={play} />Video</span>
+          <span class="tile-cap">{m.caption}</span>
+          <span class="tile-flash" aria-hidden="true"></span>
+        </button>
+      ))}
+
+      <div class="tile-text">
+        <p class="eyebrow hero-fade">Event management · New Delhi · Since 2008</p>
+        <h1 id="hero-title" class="mt-4 text-[clamp(3rem,6vw,6rem)] leading-[0.95]">
+          <span class="line-mask"><span class="hero-line block">You dream.</span></span>
+          <span class="line-mask"><span class="hero-line block"><em>We make.</em></span></span>
+        </h1>
+        <div class="hero-fade mt-6 chip-row" role="group" aria-label="Show events by type">
+          {categories.map((c, i) => (
+            <button type="button" class="chip" data-cat-btn data-cat={c.id} aria-pressed={i === 0 ? 'true' : 'false'}><span class="dot"></span>{c.label}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-fade flex items-center justify-between gap-4 py-3 text-sm text-ink/60">
+      <p class="hidden sm:block">Corporate · Government · Media · Launches · Concerts, across India</p>
+      <button type="button" class="pause-btn ml-auto inline-flex min-h-11 items-center gap-2 rounded-full px-3 font-medium text-ink/70 hover:text-ink" aria-pressed="false">
+        <span class="pause-icon" aria-hidden="true"></span><span class="pause-label">Pause videos</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wall { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :global(.js-motion) .tile, :global(.js-motion) .tile-text { opacity: 0; }
+  .tile {
+    position: relative; display: block; overflow: hidden; border-radius: 16px; background: #0d0d10; aspect-ratio: 4 / 3;
+    perspective: 900px; isolation: isolate; order: 2; color: #fff; text-align: left;
+  }
+  .tile-inner { position: absolute; inset: 0; display: block; backface-visibility: hidden; will-change: transform; }
+  .tile :global(.media-fit) { transition: transform 1.4s var(--ease-out); }
+  .tile:hover :global(.media-fit) { transform: scale(1.06); }
+  .tile-cap {
+    position: absolute; inset: auto 0 0 0; padding: 2.5rem 0.9rem 0.75rem; font-size: 0.82rem; font-weight: 500;
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.66)); opacity: 0; transform: translateY(6px); transition: opacity 0.4s, transform 0.4s;
+  }
+  .tile:hover .tile-cap, .tile:focus-visible .tile-cap { opacity: 1; transform: none; }
+  .tile-badge {
+    position: absolute; top: 0.6rem; left: 0.6rem; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.55rem;
+    border-radius: 999px; background: rgb(0 0 0 / 0.5); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; backdrop-filter: blur(6px);
+  }
+  .tile-badge[hidden] { display: none; }
+  .tile-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(180deg, transparent 10%, var(--accent) 50%, transparent 90%); mix-blend-mode: screen; }
+
+  .tile-text {
+    position: relative; order: 1; grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem 1rem; text-align: center; border-radius: 16px; border: 1px solid var(--color-line);
+    background: radial-gradient(120% 90% at 50% 0%, var(--accent-soft), transparent 70%), rgb(255 255 255 / 0.82); backdrop-filter: blur(10px);
+  }
+  .s0 { order: 0; grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+  .s7 { display: none; }
+
+  .pause-icon { position: relative; width: 0.75rem; height: 0.75rem; }
+  .pause-icon::before, .pause-icon::after { content: ''; position: absolute; top: 0; bottom: 0; width: 3px; border-radius: 1px; background: currentColor; }
+  .pause-icon::before { left: 1px; }
+  .pause-icon::after { right: 1px; }
+  .pause-btn[aria-pressed='true'] .pause-icon::before { left: 2px; right: 0; width: auto; background: none; border-left: 0.6rem solid currentColor; border-top: 0.375rem solid transparent; border-bottom: 0.375rem solid transparent; }
+  .pause-btn[aria-pressed='true'] .pause-icon::after { display: none; }
+
+  @media (min-width: 768px) {
+    .wall { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .s0 { aspect-ratio: 21 / 9; }
+  }
+  @media (min-width: 1024px) {
+    .wall {
+      grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 1fr 1.4fr 1fr;
+      height: calc(100svh - 8.25rem); min-height: 600px; max-height: 1000px;
+    }
+    .tile, .tile-text { aspect-ratio: auto; order: 0; }
+    .s0 { grid-area: 1 / 1 / 2 / 5; } .s1 { grid-area: 1 / 5 / 2 / 9; } .s2 { grid-area: 1 / 9 / 2 / 13; }
+    .s3 { grid-area: 2 / 1 / 3 / 4; } .tile-text { grid-area: 2 / 4 / 3 / 10; padding: 1.5rem; } .s4 { grid-area: 2 / 10 / 3 / 13; }
+    .s5 { grid-area: 3 / 1 / 4 / 5; } .s6 { grid-area: 3 / 5 / 4 / 9; display: block; } .s7 { grid-area: 3 / 9 / 4 / 13; display: block; }
+  }
+</style>

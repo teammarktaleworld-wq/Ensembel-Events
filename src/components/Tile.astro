@@ -1,0 +1,11 @@
+---
+import type { MediaItem } from '../data/media';
+interface Props { m: MediaItem; eager?: boolean; sizes: string }
+const { m, eager = false, sizes } = Astro.props;
+---
+
+{m.type === 'video' ? (
+  <video class="media-fit" muted loop playsinline preload="none" poster={m.thumb} data-src={m.src} data-autoplay aria-hidden="true"></video>
+) : (
+  <img class="media-fit" src={m.thumb} srcset={`${m.thumb} 640w, ${m.src} 1280w`} sizes={sizes} width={m.w} height={m.h} alt="" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding="async" />
+)}

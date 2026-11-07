@@ -1,0 +1,40 @@
+---
+import { site } from '../data/site';
+import { byId } from '../data/media';
+const bg = byId['almora-c'];
+---
+
+<section id="contact" class="relative py-20 sm:py-28" aria-labelledby="contact-title">
+  <div class="wrap">
+    <div class="cta relative overflow-hidden rounded-[28px] bg-ink text-white" data-reveal>
+      <video class="media-fit opacity-45" muted loop playsinline preload="none" poster={bg.thumb} data-src={bg.src} data-autoplay aria-hidden="true"></video>
+      <div class="absolute inset-0 bg-[radial-gradient(80%_70%_at_50%_100%,var(--accent),transparent_70%)] opacity-35" aria-hidden="true"></div>
+      <div class="relative px-6 py-16 text-center sm:px-12 sm:py-24">
+        <p class="eyebrow justify-center text-white/75">Plan your event</p>
+        <h2 id="contact-title" class="h2 mt-5" data-split>Planning an event? <em>Let's make it.</em></h2>
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+          <button type="button" class="btn-accent magnetic" data-open-enquiry>
+            Send an enquiry
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </button>
+          <a href={site.phoneHref} class="cta-ghost">Call {site.phone}</a>
+          <a href={site.whatsapp} target="_blank" rel="noopener" class="cta-ghost">WhatsApp us</a>
+        </div>
+        <!-- CLIENT TO VERIFY: office address -->
+        <p class="mt-10 text-sm text-white/65">
+          <a href={`mailto:${site.email}`} class="underline-offset-4 hover:underline">{site.email}</a>
+          <span class="mx-2" aria-hidden="true">·</span>{site.address.street}, {site.address.city}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta h2 :global(em) { color: var(--accent); }
+  .cta-ghost {
+    display: inline-flex; align-items: center; min-height: 3rem; padding: 0 1.3rem; border-radius: 999px; font-weight: 500; font-size: 0.95rem;
+    border: 1px solid rgb(255 255 255 / 0.3); background: rgb(255 255 255 / 0.08); backdrop-filter: blur(8px); transition: border-color 0.3s, background-color 0.3s;
+  }
+  .cta-ghost:hover { border-color: var(--accent); background: rgb(255 255 255 / 0.14); }
+</style>

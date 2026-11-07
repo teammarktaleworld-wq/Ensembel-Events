@@ -1,0 +1,51 @@
+---
+import { nav, site } from '../data/site';
+---
+
+<header id="site-header" class="site-header fixed inset-x-0 top-0 z-[100]">
+  <div class="header-bg pointer-events-none absolute inset-0 border-b border-line bg-paper/80 opacity-0 backdrop-blur-xl transition-opacity duration-500"></div>
+  <div class="wrap relative flex h-[4.75rem] items-center gap-6">
+    <a href="#top" class="shrink-0" aria-label="Ensembel Events, back to top">
+      <img src="/images/ensembel-logo.webp" alt="Ensembel Events" width="307" height="120" class="h-11 w-auto sm:h-12" />
+    </a>
+    <nav aria-label="Primary" class="ml-auto hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {nav.map((n) => <li><a href={n.href} class="link-underline px-3 text-[0.95rem] text-ink/75 hover:text-ink">{n.label}</a></li>)}
+      </ul>
+    </nav>
+    <a href={site.phoneHref} class="ml-auto hidden text-[0.95rem] font-medium whitespace-nowrap text-ink/80 hover:text-ink lg:ml-2 xl:inline">{site.phone}</a>
+    <button type="button" data-open-enquiry class="btn-accent magnetic ml-auto hidden sm:inline-flex lg:ml-0">Plan your event</button>
+    <button id="menu-toggle" type="button" class="ml-auto inline-flex h-12 w-12 items-center justify-center sm:ml-0 lg:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span class="relative block h-3 w-6">
+        <span class="bar absolute left-0 top-0 h-[1.5px] w-6 bg-ink transition-transform duration-300"></span>
+        <span class="bar absolute bottom-0 left-0 h-[1.5px] w-6 bg-ink transition-transform duration-300"></span>
+      </span>
+    </button>
+  </div>
+</header>
+
+<div id="mobile-menu" class="mobile-menu fixed inset-0 z-[90] flex flex-col justify-between bg-paper px-6 pb-10 pt-28 lg:hidden" hidden>
+  <nav aria-label="Mobile">
+    <ul class="space-y-1">
+      {nav.map((n, i) => (
+        <li class="overflow-hidden border-b border-line">
+          <a href={n.href} class="mm-link flex items-baseline gap-4 py-3 font-display text-4xl font-semibold tracking-tight">
+            <span class="text-sm font-medium text-accent-ink">0{i + 1}</span>{n.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <div class="mm-link space-y-4">
+    <a href={site.phoneHref} class="block text-lg font-medium">{site.phone}</a>
+    <button type="button" data-open-enquiry class="btn-accent">Plan your event</button>
+  </div>
+</div>
+
+<style>
+  .site-header { transition: transform 0.5s var(--ease-out); }
+  .site-header.is-hidden { transform: translateY(-100%); }
+  .site-header.is-solid .header-bg { opacity: 1; }
+  :global(body.menu-open) #menu-toggle .bar:first-child { transform: translateY(5px) rotate(45deg); }
+  :global(body.menu-open) #menu-toggle .bar:last-child { transform: translateY(-5px) rotate(-45deg); }
+</style>

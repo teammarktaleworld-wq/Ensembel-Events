@@ -1,0 +1,29 @@
+<div class="backdrop pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+  <div class="bd-glow absolute inset-0"></div>
+  <div class="bd-grid absolute inset-0"></div>
+  <svg class="thread-fallback absolute inset-0 h-full w-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
+    <path d="M-80 640C220 520 380 760 660 600S1080 260 1520 380" stroke="#f2c75c" stroke-width="40" stroke-opacity="0.12" stroke-linecap="round" />
+    <path d="M-80 640C220 520 380 760 660 600S1080 260 1520 380" stroke="#e3a81c" stroke-width="1.6" stroke-opacity="0.7" />
+    <path d="M-80 660C240 560 400 730 680 620S1060 300 1520 400" stroke="#e3a81c" stroke-width="1.2" stroke-opacity="0.45" />
+    <path d="M-80 610C200 500 360 790 640 580S1100 230 1520 350" stroke="#b8860b" stroke-width="1" stroke-opacity="0.35" />
+    <path d="M-80 690C260 600 420 700 700 640S1040 330 1520 430" stroke="#141416" stroke-width="0.8" stroke-opacity="0.12" />
+  </svg>
+  <canvas id="thread-canvas" class="absolute inset-0 h-full w-full"></canvas>
+</div>
+
+<style>
+  .bd-glow {
+    background:
+      radial-gradient(60vw 50vh at 85% 10%, rgb(242 199 92 / 0.18), transparent 70%),
+      radial-gradient(50vw 50vh at 5% 90%, rgb(227 168 28 / 0.08), transparent 70%);
+  }
+  .bd-grid {
+    background-image: linear-gradient(rgb(20 20 22 / 0.045) 1px, transparent 1px), linear-gradient(90deg, rgb(20 20 22 / 0.045) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+  }
+  #thread-canvas { opacity: 0; transition: opacity 1.2s ease; }
+  :global(html.thread-on) #thread-canvas { opacity: 1; }
+  .thread-fallback { transition: opacity 1.2s ease; }
+  :global(html.thread-on) .thread-fallback { opacity: 0; }
+</style>

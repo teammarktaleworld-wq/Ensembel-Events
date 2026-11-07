@@ -1,0 +1,34 @@
+---
+import { process } from '../data/site';
+---
+
+<section id="process" class="relative py-20 sm:py-28" aria-labelledby="process-title">
+  <div class="wrap">
+    <div class="text-center">
+      <p class="eyebrow justify-center" data-reveal>How we work</p>
+      <h2 id="process-title" class="h2 mt-4" data-split>Brief to <em>applause</em>.</h2>
+    </div>
+    <div class="steps relative mx-auto mt-14 max-w-6xl">
+      <span class="absolute top-7 right-[8%] left-[8%] hidden h-px bg-line lg:block" aria-hidden="true"></span>
+      <span class="process-line absolute top-7 right-[8%] left-[8%] hidden h-px origin-left bg-accent lg:block" aria-hidden="true"></span>
+      <ol class="relative grid grid-cols-3 gap-y-10 lg:grid-cols-6">
+        {process.map((p, i) => (
+          <li class="process-step flex flex-col items-center text-center">
+            <span class="step-dot">0{i + 1}</span>
+            <span class="mt-4 font-display text-lg font-semibold tracking-tight sm:text-xl">{p}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .step-dot {
+    position: relative; display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 999px;
+    border: 1.5px solid var(--accent); background: var(--color-paper); font-size: 0.85rem; font-weight: 600; color: var(--accent-ink);
+    transition: background-color 0.5s var(--ease-out), color 0.5s;
+  }
+  .process-step.is-active .step-dot, :global(html:not(.js-motion)) .step-dot { background: var(--accent); color: var(--color-ink); }
+  :global(.js-motion) .process-line { transform: scaleX(0); }
+</style>

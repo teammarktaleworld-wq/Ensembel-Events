@@ -1,0 +1,55 @@
+---
+import { stats, clients } from '../data/site';
+const rows = [clients.slice(0, 12), clients.slice(12)];
+---
+
+<section id="clients" class="relative py-20 sm:py-28" aria-labelledby="clients-title">
+  <div class="wrap">
+    <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-[22px] border border-line bg-line md:grid-cols-4" data-reveal>
+      {stats.map((s) => (
+        <div class="flex flex-col-reverse items-center bg-white/85 px-4 py-8 text-center backdrop-blur sm:py-10">
+          <dt class="mt-2 text-sm text-ink/60">{s.label}</dt>
+          <dd class="font-display text-[clamp(2.4rem,5vw,4rem)] leading-none font-semibold tracking-tight">
+            {s.text ? <span class="text-accent-ink">{s.text}</span> : s.count ? <><span class="count" data-count={s.value}>{s.value}</span><span class="text-accent-ink">{s.suffix}</span></> : s.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+    <h2 id="clients-title" class="eyebrow mt-20 w-full justify-center" data-reveal>Trusted by India's leading brands</h2>
+  </div>
+
+  <div class="mt-10 space-y-3" data-reveal>
+    {rows.map((row, r) => (
+      <div class="logo-row overflow-hidden">
+        <ul class={`logo-track flex w-max gap-3 ${r === 1 ? 'is-reverse' : ''}`}>
+          {[0, 1].map((copy) =>
+            row.map((c) => (
+              <li class="logo-card" aria-hidden={copy === 1 ? 'true' : undefined}>
+                <img src={c.src} alt={copy === 1 ? '' : c.name} width={c.w} height={c.h} loading="lazy" decoding="async" />
+              </li>
+            )),
+          )}
+        </ul>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .logo-row { mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .logo-track { animation: logos 60s linear infinite; }
+  .logo-track.is-reverse { animation-direction: reverse; animation-duration: 70s; }
+  .logo-row:hover .logo-track { animation-play-state: paused; }
+  @keyframes logos { to { transform: translateX(calc(-50% - 0.375rem)); } }
+  .logo-card {
+    display: grid; place-items: center; width: 11rem; height: 6rem; flex: none; padding: 1rem 1.4rem;
+    border-radius: 18px; border: 1px solid var(--color-line); background: #fff; transition: border-color 0.4s, transform 0.4s var(--ease-out);
+  }
+  .logo-card img { max-height: 3.4rem; max-width: 100%; width: auto; height: auto; object-fit: contain; filter: grayscale(1); opacity: 0.72; transition: filter 0.4s, opacity 0.4s; }
+  .logo-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .logo-card:hover img { filter: none; opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; }
+    .logo-card[aria-hidden='true'] { display: none; }
+  }
+</style>
