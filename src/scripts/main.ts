@@ -7,12 +7,16 @@ import { initWall } from './wall';
 import { initGallery } from './gallery';
 import { initPanels, initShowreel } from './sections';
 import { initAnimations } from './animations';
+import { initWeddings } from './wedding';
 
 declare global { interface Window { __eeReady?: boolean } }
 
 export function initApp() {
   window.__eeReady = true;
-  app.motion = document.documentElement.classList.contains('js-motion');
+  const root = document.documentElement;
+  // A slow first load can trip the no-motion safety net in Base.astro; once the app runs, motion is safe again.
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) root.classList.add('js-motion');
+  app.motion = root.classList.contains('js-motion');
   app.lenis = app.motion ? createLenis() : null;
 
   initLightbox();
@@ -24,6 +28,7 @@ export function initApp() {
   initUI();
   autoplayAll();
   if (app.motion) initAnimations();
+  initWeddings();
 
   // The WebGL thread loads after first paint; the static SVG curves stay as the fallback.
   const canvas = document.getElementById('thread-canvas') as HTMLCanvasElement | null;

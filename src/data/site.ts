@@ -5,9 +5,9 @@ import type { Category } from './media';
 export const site = {
   name: 'Ensembel Events',
   url: 'https://www.ensembelevents.com',
-  title: 'Ensembel Events — Corporate & Government Event Management, New Delhi',
+  title: 'Ensembel Events — Corporate, Government & Wedding Event Management, New Delhi',
   description:
-    'Ensembel Events plans and produces corporate conferences, award shows, product launches, concerts and government events across India. New Delhi, since 2008.',
+    'Ensembel Events plans and produces corporate conferences, award shows, product launches, concerts, government events and weddings across India. 1000+ events, New Delhi, since 2008.',
   tagline: 'You dream. We make.',
   phone: '+91 98111 14797',
   phoneHref: 'tel:+919811114797',
@@ -21,6 +21,7 @@ export const site = {
 export const nav = [
   { label: 'Work', href: '#work' },
   { label: 'Services', href: '#services' },
+  { label: 'Weddings', href: '#weddings' },
   { label: 'Showreel', href: '#showreel' },
   { label: 'Clients', href: '#clients' },
   { label: 'Contact', href: '#contact' },
@@ -45,8 +46,8 @@ export const wall: Record<Category, string[]> = {
 };
 
 export const stats = [
+  { value: 1000, prefix: '', suffix: '+', label: 'Events delivered', count: true },
   { value: 2008, prefix: '', suffix: '', label: 'Founded', count: false },
-  { value: 12, prefix: '', suffix: '', label: 'Event services', count: true },
   { value: 24, prefix: '', suffix: '+', label: 'Brands served', count: true },
   { value: 0, prefix: '', suffix: '', label: 'Pan-India delivery', count: false, text: 'India' },
 ];
@@ -86,7 +87,58 @@ export const serviceGroups: { title: string; cat: Exclude<Category, 'all'>; medi
   { title: 'Concerts & Experiences', cat: 'live', media: 'almora-b', items: ['Concerts & festivals', 'Theme parties', 'Gaming competitions'] },
 ];
 
-export const eventTypes = [...serviceGroups.flatMap((g) => g.items)];
+export const wedding = {
+  eventTypes: ['Wedding', 'Destination wedding', 'Haldi, mehendi & sangeet', 'Reception'],
+  whatsapp: 'https://wa.me/919811114797?text=' + encodeURIComponent("Hi, I'd like to plan a wedding"),
+  // One mandap, re-dressed for every function. Labels point at parts of the 3D scene.
+  chapters: [
+    {
+      id: 'haldi', time: 'Morning', title: 'Haldi', mood: 'Turmeric, marigold and the first dhol of the day',
+      text: 'Turmeric, sunshine-yellow drapes and marigold strings, with the dhol going from the first knock on the door.',
+      items: ['Marigold décor', 'Dhol & baaja', 'Haldi rituals'],
+      labels: [{ anchor: 'lari', text: 'Fresh marigold laris' }, { anchor: 'kalash', text: 'Kalash & mango leaves' }],
+    },
+    {
+      id: 'mehendi', time: 'Afternoon', title: 'Mehendi', mood: 'Parrot green, rani pink and henna on every hand',
+      text: 'Parrot green and rani pink, mehendi artists for every hand, swings, music and live chaat counters.',
+      items: ['Mehendi artists', 'Themed décor', 'Live counters'],
+      labels: [{ anchor: 'canopy', text: 'Draped fabric canopy' }, { anchor: 'pillarFront', text: 'Marigold-wrapped pillars' }],
+    },
+    {
+      id: 'sangeet', time: 'Evening', title: 'Sangeet', mood: 'Lights, music and both families on the dance floor',
+      text: 'A stage, sound and lights for both families, choreography for the cousins, and a palace lit up after sunset.',
+      items: ['Stage & sound', 'Choreography', 'Live performers'],
+      labels: [{ anchor: 'fairy', text: 'Fairy-light canopy' }, { anchor: 'samai', text: 'Brass samai lamps' }],
+    },
+    {
+      id: 'pheras', time: 'Twilight', title: 'Pheras', mood: 'Seven rounds around the sacred fire',
+      text: 'The mandap, the pandit ji and seven rounds around the sacred fire, tied together by the gathbandhan.',
+      items: ['Mandap design', 'Rituals & samagri', 'Phoolon ki chadar'],
+      labels: [{ anchor: 'agni', text: 'Agni kund' }, { anchor: 'rangoli', text: 'Flower rangoli' }],
+    },
+    {
+      id: 'reception', time: 'Night', title: 'Reception', mood: 'Ivory, gold and a grand entry under the fireworks',
+      text: 'Ivory and gold under a crystal chandelier, a grand entry for the couple and dinner for every guest.',
+      items: ['Grand entry', 'Lighting design', 'Guest hospitality'],
+      labels: [{ anchor: 'chandelier', text: 'Crystal chandelier' }, { anchor: 'dome', text: 'Chhatri dome & kalash' }],
+    },
+  ],
+  vows: [
+    'Food and nourishment for their home',
+    'Strength of body, mind and spirit',
+    'Prosperity, earned together',
+    'Love and respect for both families',
+    'Children and a happy home',
+    'Health and a long life together',
+    'Friendship, for life',
+  ],
+  services: [
+    'Wedding planning', 'Venues & destination weddings', 'Mandap & décor', 'Haldi & mehendi', 'Sangeet & entertainment', 'Baraat',
+    'Guest travel & hospitality', 'Catering management', 'Photography & film', 'Reception',
+  ],
+};
+
+export const eventTypes = [...serviceGroups.flatMap((g) => g.items), ...wedding.eventTypes];
 
 // Showreel tabs: loop id plays inline, the full video (with sound) opens on demand.
 export const reels = [

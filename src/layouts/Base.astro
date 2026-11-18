@@ -43,7 +43,7 @@ const jsonLd = {
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Ensembel Events — corporate and government event management, New Delhi" />
+    <meta property="og:image:alt" content="Ensembel Events — corporate, government and wedding event management, New Delhi" />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <!-- Decide before first paint whether motion is allowed. -->
@@ -53,7 +53,7 @@ const jsonLd = {
         d.classList.add('js');
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('js-motion');
         // Safety net: if the app script never starts, show content without motion.
-        setTimeout(function () { if (!window.__eeReady) d.classList.remove('js-motion'); }, 4000);
+        setTimeout(function () { if (!window.__eeReady) d.classList.remove('js-motion'); }, 10000);
       })();
     </script>
   </head>

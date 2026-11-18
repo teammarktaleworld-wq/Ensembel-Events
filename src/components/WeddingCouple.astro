@@ -1,0 +1,373 @@
+---
+import { wedding } from '../data/site';
+
+type Pt = { x: number; y: number };
+const ROSE = ['rose', 'jasmine', 'marigold', 'blush'];
+
+// Flowers along a U-shaped garland hanging between two points.
+function garland(x0: number, x1: number, top: number, depth: number, n: number, size = 8) {
+  const cx = (x0 + x1) / 2;
+  return Array.from({ length: n + 1 }, (_, i) => {
+    const t = i / n;
+    const x = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * cx + t * t * x1;
+    const y = (1 - t) ** 2 * top + 2 * (1 - t) * t * (top + depth * 2) + t * t * top;
+    return { x: +x.toFixed(1), y: +y.toFixed(1), r: size + (i % 3 === 0 ? 1.5 : 0), kind: ROSE[i % 4] };
+  });
+}
+
+// Floral arch: two legs and a semicircle, two staggered layers of blooms with leaves.
+const arch: { x: number; y: number; r: number; kind: string; leaf?: number }[] = [];
+const ARCH_R = 300;
+const ARCH_Y = 430;
+const archPath = (s: number): Pt => {
+  const leg = 960 - ARCH_Y;
+  const arc = Math.PI * ARCH_R;
+  const total = leg * 2 + arc;
+  const d = s * total;
+  if (d < leg) return { x: 600 - ARCH_R, y: 960 - d };
+  if (d < leg + arc) {
+    const a = Math.PI - (d - leg) / ARCH_R;
+    return { x: 600 + Math.cos(a) * ARCH_R, y: ARCH_Y - Math.sin(a) * ARCH_R };
+  }
+  return { x: 600 + ARCH_R, y: ARCH_Y + (d - leg - arc) };
+};
+for (let i = 0; i <= 130; i++) {
+  const p = archPath(i / 130);
+  const jitter = (k: number) => Math.sin(i * 12.9898 + k) * 9;
+  arch.push({ x: p.x + jitter(1), y: p.y + jitter(2), r: 14 + (i % 3) * 3, kind: ROSE[(i * 3) % 4] });
+  if (i % 2 === 0) arch.push({ x: p.x - jitter(3) * 1.4, y: p.y - jitter(4) * 1.4, r: 9, kind: 'leaf', leaf: (i * 37) % 180 });
+}
+const strands = [390, 440, 590, 640, 760, 810].map((x, i) => {
+  const top = ARCH_Y - Math.sqrt(Math.max(0, ARCH_R ** 2 - (x - 600) ** 2)) + 12;
+  const len = 70 + ((i * 53) % 90);
+  return Array.from({ length: Math.floor(len / 13) }, (_, k) => ({ x, y: top + k * 13 }));
+});
+
+const groomHeld = garland(536, 590, 478, 70, 16, 7.5);
+const brideHeld = garland(632, 682, 486, 70, 16, 7.5);
+const groomWorn = garland(466, 512, 316, 120, 22, 8);
+const brideWorn = garland(708, 748, 344, 112, 22, 8);
+const mala = garland(468, 508, 318, 60, 16, 3.2);
+
+const pleats = Array.from({ length: 15 }, (_, i) => {
+  const top = 690 + i * 4.2;
+  const bottom = 584 + i * 21.5;
+  return `M${top} 556 Q${(top + bottom) / 2 + (i - 7) * 4} 760 ${bottom} 944`;
+});
+const mandala = Array.from({ length: 24 }, (_, i) => i * 15);
+const petals = Array.from({ length: 22 }, (_, i) => ({
+  x: 60 + ((i * 197) % 1080), delay: -((i * 1.7) % 11), dur: 9 + (i % 5) * 1.6, kind: ['#e0284a', '#f29bb0', '#ffc22e', '#ffffff'][i % 4], s: 0.7 + (i % 3) * 0.25,
+}));
+const bursts = Array.from({ length: 14 }, (_, i) => ({ a: (i / 14) * Math.PI * 2, d: 60 + (i % 3) * 22, c: ['#e0284a', '#ffc22e', '#f29bb0', '#ffffff'][i % 4] }));
+const diyas = [250, 340, 860, 950];
+---
+
+<div class="wd-couple">
+  <div class="wd-couple-sticky">
+    <div class="wd-couple-card">
+      <div class="wd-couple-copy">
+        <p class="wd-shubh" lang="hi">शुभ विवाह</p>
+        <h2 class="h2 wd-couple-title" data-split>Two families. <em>One celebration.</em></h2>
+        <p class="mt-5 max-w-md text-ink/70">
+          Every wedding gets the crew that runs national conferences and award nights: one planner, one budget, and a run-of-show for each function.
+        </p>
+        <ul class="wd-services mt-6" aria-label="Wedding services">
+          {wedding.services.map((s) => <li>{s}</li>)}
+        </ul>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <button type="button" class="btn-accent wd-cta magnetic" data-open-enquiry data-type="Wedding">
+            Plan your wedding
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </button>
+          <a href={wedding.whatsapp} target="_blank" rel="noopener" class="btn-ghost">WhatsApp us</a>
+        </div>
+        <dl class="wd-facts mt-8">
+          <div><dt>Events delivered</dt><dd>1000+</dd></div>
+          <div><dt>Functions, one crew</dt><dd>Haldi to reception</dd></div>
+          <div><dt>Weddings &amp; destinations</dt><dd>Pan-India</dd></div>
+        </dl>
+      </div>
+
+      <div class="wd-couple-art">
+        <svg viewBox="0 0 1200 1000" role="img" aria-labelledby="wd-art-title">
+          <title id="wd-art-title">Illustration: a bride and groom exchange flower garlands under a floral arch</title>
+          <defs>
+            <linearGradient id="c-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7dc92" /><stop offset="0.5" stop-color="#d6a23e" /><stop offset="1" stop-color="#a8742a" /></linearGradient>
+            <linearGradient id="c-sherwani" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e6d8bd" /><stop offset="0.35" stop-color="#fffaf0" /><stop offset="0.75" stop-color="#f3e8d3" /><stop offset="1" stop-color="#d9c8a8" /></linearGradient>
+            <linearGradient id="c-leg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7efe0" /><stop offset="1" stop-color="#d8c9ac" /></linearGradient>
+            <linearGradient id="c-maroon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a51f38" /><stop offset="1" stop-color="#6a0d20" /></linearGradient>
+            <linearGradient id="c-safa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffbe45" /><stop offset="0.55" stop-color="#f2861e" /><stop offset="1" stop-color="#d9501b" /></linearGradient>
+            <pattern id="c-lehariya" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="14" height="5" fill="#d1361c" opacity="0.55" /><rect y="7" width="14" height="2" fill="#ffe08a" opacity="0.7" /></pattern>
+            <linearGradient id="c-skin-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b47548" /><stop offset="0.6" stop-color="#cf9064" /><stop offset="1" stop-color="#c3845a" /></linearGradient>
+            <linearGradient id="c-skin-b" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#bd8155" /><stop offset="0.6" stop-color="#dba57b" /><stop offset="1" stop-color="#cf9670" /></linearGradient>
+            <linearGradient id="c-lehenga" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7d0a1f" /><stop offset="0.45" stop-color="#bf1734" /><stop offset="0.7" stop-color="#a9122c" /><stop offset="1" stop-color="#76091d" /></linearGradient>
+            <linearGradient id="c-choli" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d0c23" /><stop offset="0.5" stop-color="#b7142f" /><stop offset="1" stop-color="#860b21" /></linearGradient>
+            <linearGradient id="c-veil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3294f" stop-opacity="0.85" /><stop offset="1" stop-color="#c2163d" stop-opacity="0.7" /></linearGradient>
+            <pattern id="c-buti" width="34" height="38" patternUnits="userSpaceOnUse"><g fill="#f0c25c"><circle cx="8" cy="9" r="2.6" /><circle cx="8" cy="3.8" r="1.5" /><circle cx="3.6" cy="11" r="1.5" /><circle cx="12.4" cy="11" r="1.5" /><circle cx="25" cy="28" r="2" /></g></pattern>
+            <pattern id="c-zari" width="26" height="40" patternUnits="userSpaceOnUse"><rect width="26" height="40" fill="url(#c-gold)" /><path d="M13 6 l7 10 l-7 10 l-7 -10 z" fill="#8c0b22" opacity="0.55" /><circle cx="13" cy="16" r="2.4" fill="#fff3c4" /></pattern>
+            <radialGradient id="f-rose"><stop offset="0" stop-color="#ff6b80" /><stop offset="0.6" stop-color="#d81f45" /><stop offset="1" stop-color="#93102c" /></radialGradient>
+            <radialGradient id="f-blush"><stop offset="0" stop-color="#fff0f3" /><stop offset="0.6" stop-color="#f7b4c3" /><stop offset="1" stop-color="#e08299" /></radialGradient>
+            <radialGradient id="f-jasmine"><stop offset="0" stop-color="#ffffff" /><stop offset="0.7" stop-color="#f6efe3" /><stop offset="1" stop-color="#dcd1bf" /></radialGradient>
+            <radialGradient id="f-marigold"><stop offset="0" stop-color="#ffe066" /><stop offset="0.55" stop-color="#ffaa1d" /><stop offset="1" stop-color="#e2650f" /></radialGradient>
+            <radialGradient id="c-glow"><stop offset="0" stop-color="#fff1d6" stop-opacity="0.95" /><stop offset="1" stop-color="#fff1d6" stop-opacity="0" /></radialGradient>
+            <radialGradient id="c-flame"><stop offset="0" stop-color="#fff7d1" /><stop offset="0.5" stop-color="#ffb534" /><stop offset="1" stop-color="#ff7a1a" stop-opacity="0" /></radialGradient>
+            <symbol id="bloom" viewBox="-10 -10 20 20" overflow="visible"><circle r="10" /><circle r="5.5" fill="#fff" opacity="0.18" /><circle r="2.4" fill="#000" opacity="0.12" /></symbol>
+          </defs>
+
+          <g class="wd-mandala" fill="none" stroke="#c9952b" stroke-width="1.4" opacity="0.32">
+            <circle cx="600" cy="500" r="440" /><circle cx="600" cy="500" r="380" stroke-dasharray="2 8" /><circle cx="600" cy="500" r="330" />
+            {mandala.map((a) => <ellipse cx="600" cy="100" rx="26" ry="62" transform={`rotate(${a} 600 500)`} />)}
+            {mandala.map((a) => <circle cx="600" cy="150" r="5" transform={`rotate(${a + 7.5} 600 500)`} />)}
+          </g>
+          <ellipse cx="600" cy="560" rx="360" ry="330" fill="url(#c-glow)" class="wd-glow" />
+
+          <g class="wd-arch">
+            {strands.map((s) => s.map((p, k) => <use href="#bloom" class="wd-arch-flower" x={p.x - 5} y={p.y - 5} width="10" height="10" fill={k % 3 === 2 ? 'url(#f-marigold)' : 'url(#f-jasmine)'} />))}
+            {arch.map((f) => f.kind === 'leaf'
+              ? <g transform={`translate(${f.x} ${f.y}) rotate(${f.leaf})`}><ellipse class="wd-arch-flower" rx="13" ry="5.5" fill="#3e8a3a" /></g>
+              : <use href="#bloom" class="wd-arch-flower" x={f.x - f.r} y={f.y - f.r} width={f.r * 2} height={f.r * 2} fill={`url(#f-${f.kind})`} />)}
+          </g>
+
+          <!-- Groom -->
+          <g class="wd-groom">
+            <path class="g-tail" d="M458 236 C444 296 438 360 428 438 C436 443 446 444 455 442 C462 370 468 302 474 248 Z" fill="url(#c-safa)" />
+            <path class="g-tail" d="M458 236 C444 296 438 360 428 438 C436 443 446 444 455 442 C462 370 468 302 474 248 Z" fill="url(#c-lehariya)" />
+            <path d="M446 760 C444 830 446 890 452 936 L476 936 C478 890 479 830 481 760 Z" fill="url(#c-leg)" />
+            <path d="M491 760 C491 830 493 890 497 936 L521 936 C523 890 525 830 527 760 Z" fill="url(#c-leg)" />
+            <path d="M452 900 q12 6 24 0 M453 912 q12 6 23 0 M454 924 q11 5 22 0 M497 900 q12 6 24 0 M498 912 q12 6 23 0 M498 924 q11 5 22 0" fill="none" stroke="#cbbb9c" stroke-width="2" />
+            <path d="M444 934 C444 951 462 958 490 956 C502 955 509 950 514 940 C506 945 495 946 484 940 C472 935 460 931 444 934 Z" fill="url(#c-gold)" />
+            <path d="M490 934 C490 951 508 958 536 956 C548 955 555 950 560 940 C552 945 541 946 530 940 C518 935 506 931 490 934 Z" fill="url(#c-gold)" />
+
+            <path d="M480 312 C462 316 440 324 420 338 C410 382 418 452 430 520 C424 600 412 690 402 768 C450 779 512 781 561 770 C552 690 540 600 532 520 C544 452 552 382 542 338 C524 324 500 316 480 312 Z" fill="url(#c-sherwani)" />
+            <path d="M532 520 C540 600 552 690 561 770 C552 772 545 773 538 773 C532 690 526 600 520 524 Z" fill="#d8c6a4" opacity="0.5" />
+            <path d="M403 752 C452 763 512 765 559 754 L561 772 C512 783 452 783 402 770 Z" fill="url(#c-gold)" />
+            <path d="M406 760 C452 770 512 771 558 762" fill="none" stroke="#8c0b22" stroke-width="1.6" stroke-dasharray="3 5" />
+            <path d="M488 318 L501 318 L507 771 L492 773 Z" fill="url(#c-gold)" />
+            {[340, 372, 404, 436, 468, 500].map((y) => <circle cx={496 + (y - 340) * 0.012} cy={y} r="4.2" fill="#fff3c4" stroke="#a8742a" stroke-width="1.2" />)}
+            <path d="M424 336 C440 330 452 334 462 344 C496 420 528 520 556 612 C560 662 562 712 566 764 L540 766 C536 714 534 670 530 628 C504 542 470 452 434 374 Z" fill="url(#c-maroon)" />
+            <path d="M462 344 C496 420 528 520 556 612 C560 662 562 712 566 764 M434 374 C470 452 504 542 530 628 C534 670 536 714 540 766" fill="none" stroke="url(#c-gold)" stroke-width="3" />
+            <path d="M542 650 l6 8 l6 -8 M538 700 l6 8 l6 -8" fill="none" stroke="#f0c25c" stroke-width="1.6" />
+
+            <g class="wd-garland g-worn">
+              {groomWorn.map((f) => <use href="#bloom" x={f.x - f.r} y={f.y - f.r} width={f.r * 2} height={f.r * 2} fill={`url(#f-${f.kind})`} />)}
+            </g>
+            {mala.map((f) => <circle cx={f.x} cy={f.y} r={f.r} fill="#fbf6ec" stroke="#d8cbb4" stroke-width="0.6" />)}
+
+            <path d="M469 284 L470 314 C482 320 496 320 505 313 L504 288 Z" fill="#b2744a" />
+            <path d="M466 296 C478 292 494 292 506 296 L508 318 C494 313 478 313 464 318 Z" fill="url(#c-gold)" />
+            <path d="M460 250 C458 226 478 210 502 212 C522 214 534 230 532 250 C531 256 534 262 536 266 C537 269 534 271 531 271 C531 276 532 280 528 283 C530 288 527 292 522 293 C520 300 512 304 502 304 C488 303 474 296 466 284 C460 274 460 262 460 250 Z" fill="url(#c-skin-g)" />
+            <path d="M461 244 C458 262 462 276 468 283 L473 262 C471 254 468 248 465 243 Z" fill="#1d1512" />
+            <path d="M471 254 C463 252 462 268 470 273 C473 268 474 260 471 254 Z" fill="#a96c43" />
+            <path d="M508 253 q8 6 16 0" fill="none" stroke="#3a2418" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M510 256 l-2 3 M515 258 l-1 3 M520 257 l1 3" stroke="#3a2418" stroke-width="1.2" stroke-linecap="round" />
+            <path d="M505 241 q11 -6 21 -1" fill="none" stroke="#1d1512" stroke-width="3.2" stroke-linecap="round" />
+            <path d="M517 281 q7 -4 14 1" fill="none" stroke="#1d1512" stroke-width="2.6" stroke-linecap="round" />
+            <path d="M520 288 q5 2 9 -1" fill="none" stroke="#8c3b2c" stroke-width="2" stroke-linecap="round" />
+            <path d="M524 224 l1.5 14" stroke="#c8102e" stroke-width="3.2" stroke-linecap="round" />
+
+            <path d="M452 250 C446 214 462 178 494 170 C522 164 548 182 546 214 C545 226 540 234 532 240 C516 230 494 226 474 232 C464 236 456 242 452 250 Z" fill="url(#c-safa)" />
+            <path d="M452 250 C446 214 462 178 494 170 C522 164 548 182 546 214 C545 226 540 234 532 240 C516 230 494 226 474 232 C464 236 456 242 452 250 Z" fill="url(#c-lehariya)" />
+            <path d="M457 236 C478 218 512 210 541 222 M461 218 C484 200 516 194 545 204 M470 198 C490 184 516 180 538 188" fill="none" stroke="#b9461a" stroke-width="3" stroke-linecap="round" opacity="0.55" />
+            <g class="g-kalgi">
+              <path d="M522 204 C520 178 508 152 488 136 C503 160 510 182 514 204 Z" fill="#fffaf0" />
+              <path d="M520 204 C522 182 518 160 506 142 C512 166 513 186 512 204 Z" fill="#f3e9d8" />
+              <path d="M514 196 l9 -11 l9 11 l-9 13 Z" fill="url(#c-gold)" />
+              <circle cx="523" cy="197" r="4.4" fill="#c8102e" />
+              {[0, 1, 2, 3].map((k) => <circle cx={515 + k * 5.4} cy={213 + (k % 2) * 3} r="2.4" fill="#fbf6ec" />)}
+            </g>
+
+            <g class="g-arm g-arm-back">
+              <path d="M418 345 C409 398 413 440 425 468 C440 489 500 491 540 483 L542 462 C500 466 457 462 447 446 C440 420 442 380 446 350 Z" fill="url(#c-sherwani)" />
+              <path d="M523 467 l10 20" stroke="url(#c-gold)" stroke-width="5" stroke-linecap="round" />
+              <ellipse cx="548" cy="476" rx="15" ry="11" fill="url(#c-skin-g)" />
+            </g>
+            <g class="g-arm g-arm-front">
+              <path d="M538 341 C560 360 566 410 562 456 C560 470 556 478 548 482 L530 470 C538 452 540 412 532 372 Z" fill="url(#c-sherwani)" />
+              <path d="M533 463 l12 22" stroke="url(#c-gold)" stroke-width="5" stroke-linecap="round" />
+              <ellipse cx="572" cy="474" rx="14" ry="10.5" fill="#c98a5e" />
+            </g>
+          </g>
+
+          <!-- Bride -->
+          <g class="wd-bride">
+            <path class="b-veil-back" d="M700 232 C676 300 640 420 614 560 C594 690 582 820 576 952 L884 952 C876 820 864 690 842 560 C818 420 782 300 754 232 Z" fill="url(#c-veil)" />
+            <path class="b-veil-back" d="M700 232 C676 300 640 420 614 560 C594 690 582 820 576 952 M754 232 C782 300 818 420 842 560 C864 690 876 820 884 952" fill="none" stroke="url(#c-gold)" stroke-width="5" />
+            <path d="M676 545 C650 620 618 720 596 820 C586 870 576 910 566 948 C620 967 820 967 896 948 C884 910 874 870 864 820 C842 720 800 620 768 545 C740 553 704 553 676 545 Z" fill="url(#c-lehenga)" />
+            <path d="M676 545 C650 620 618 720 596 820 C586 870 576 910 566 948 C620 967 820 967 896 948 C884 910 874 870 864 820 C842 720 800 620 768 545 C740 553 704 553 676 545 Z" fill="url(#c-buti)" opacity="0.85" />
+            {pleats.map((d) => <path d={d} fill="none" stroke="#5f0716" stroke-width="2.2" opacity="0.32" />)}
+            <path d="M584 858 C650 872 812 872 878 858 L881 870 C812 885 650 885 581 870 Z" fill="url(#c-gold)" />
+            <path d="M572 905 C640 921 820 921 890 905 L896 948 C820 967 620 967 566 948 Z" fill="url(#c-zari)" />
+            <path d="M566 948 C620 967 820 967 896 948" fill="none" stroke="#f7dc92" stroke-width="3" />
+
+            <path d="M680 520 C700 528 744 528 764 520 L768 548 C740 556 704 556 676 548 Z" fill="url(#c-skin-b)" />
+            <path d="M672 372 C690 360 756 360 776 372 C780 420 772 480 766 524 C744 532 702 532 680 524 C674 480 666 420 672 372 Z" fill="url(#c-choli)" />
+            <path d="M680 514 C702 522 744 522 766 514 L766 526 C744 534 702 534 680 526 Z" fill="url(#c-gold)" />
+            <path d="M712 300 L712 342 C722 352 734 352 742 342 L742 304 Z" fill="#c08559" />
+
+            <g class="wd-garland b-worn">
+              {brideWorn.map((f) => <use href="#bloom" x={f.x - f.r} y={f.y - f.r} width={f.r * 2} height={f.r * 2} fill={`url(#f-${f.kind})`} />)}
+            </g>
+            <path d="M711 330 C722 342 734 342 744 330 L744 340 C734 352 722 352 711 340 Z" fill="url(#c-gold)" />
+            {[716, 724, 732, 740].map((x) => <circle cx={x} cy={344 + (x === 724 || x === 732 ? 3 : 0)} r="3" fill={x % 16 === 0 ? '#1f8a5b' : '#c8102e'} />)}
+            <path d="M706 352 C712 404 740 404 748 352" fill="none" stroke="url(#c-gold)" stroke-width="5" />
+            <path d="M702 356 C708 438 744 438 752 356" fill="none" stroke="url(#c-gold)" stroke-width="3.4" stroke-dasharray="5 3" />
+            <circle cx="727" cy="433" r="7" fill="#c8102e" stroke="url(#c-gold)" stroke-width="3" />
+
+            <path d="M748 252 C750 228 732 212 710 214 C690 216 680 232 682 252 C683 258 680 263 678 267 C677 270 680 272 683 272 C683 277 682 281 686 284 C684 289 687 292 692 293 C694 300 702 304 712 304 C726 303 738 296 744 284 C750 274 748 262 748 252 Z" fill="url(#c-skin-b)" />
+            <path d="M686 240 C690 220 708 208 726 210 C746 212 758 228 756 250 C756 262 752 276 746 288 C748 268 746 250 738 238 C728 226 710 222 700 230 C694 234 690 238 686 240 Z" fill="#1a1210" />
+            <circle cx="760" cy="266" r="20" fill="#1a1210" />
+            <path d="M688 262 q8 6 16 0" fill="none" stroke="#3a2418" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M690 265 l-1 3 M695 267 l0 3 M700 266 l1 3" stroke="#3a2418" stroke-width="1.2" stroke-linecap="round" />
+            <path d="M686 250 q10 -6 20 -1" fill="none" stroke="#1d1512" stroke-width="2.6" stroke-linecap="round" />
+            <circle cx="697" cy="244" r="3.4" fill="#c8102e" />
+            <path d="M688 291 q5 3 10 0 q-5 5 -10 0" fill="#b3122e" />
+            <path d="M728 211 C722 220 714 228 708 234" fill="none" stroke="url(#c-gold)" stroke-width="2.4" />
+            <path d="M701 233 l7 -5 l7 5 l-7 9 Z" fill="url(#c-gold)" /><circle cx="708" cy="235" r="2.6" fill="#c8102e" />
+            <circle cx="689" cy="287" r="12" fill="none" stroke="url(#c-gold)" stroke-width="2.6" />
+            <circle cx="680" cy="291" r="2.4" fill="#fbf6ec" /><circle cx="684" cy="298" r="2.2" fill="#c8102e" />
+            <path d="M699 282 C716 280 730 270 740 258" fill="none" stroke="#e8c26a" stroke-width="1.4" stroke-dasharray="2 2" />
+            <g class="b-jhumka">
+              <circle cx="745" cy="282" r="3.5" fill="url(#c-gold)" />
+              <path d="M737 300 C737 290 753 290 753 300 Z" fill="url(#c-gold)" />
+              {[738, 742, 746, 750, 753].map((x) => <circle cx={x} cy="303" r="1.8" fill="#fbf6ec" />)}
+            </g>
+
+            <path class="b-veil" d="M680 248 C676 214 704 192 730 194 C758 196 776 220 774 252 C772 300 786 340 800 374 L780 380 C766 346 756 302 756 258 C756 230 742 214 724 212 C704 212 692 226 690 248 C690 282 684 322 670 362 L652 358 C668 318 682 284 680 248 Z" fill="url(#c-veil)" />
+            <path d="M652 358 C668 318 682 284 680 248 C676 214 704 192 730 194 C758 196 776 220 774 252 C772 300 786 340 800 374" fill="none" stroke="url(#c-gold)" stroke-width="4" />
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => <circle cx={688 + k * 11} cy={210 - Math.sin((k / 7) * Math.PI) * 14} r="2" fill="#f7dc92" />)}
+
+            <g class="b-arm b-arm-back">
+              <path d="M772 376 C786 410 784 452 760 480 C744 494 704 496 676 490 L678 470 C702 474 738 470 750 458 C762 440 764 410 756 384 Z" fill="url(#c-choli)" />
+              {[0, 1, 2, 3, 4].map((k) => <path d={`M${684 + k * 1} ${458 + k * 6} q10 4 18 0`} fill="none" stroke={k % 2 ? '#f3e7d2' : '#b3122e'} stroke-width="5" stroke-linecap="round" />)}
+              <ellipse cx="682" cy="489" rx="13" ry="10.5" fill="#d69e74" />
+              <path d="M676 486 l3 4 M682 485 l3 5" stroke="#8a3d1e" stroke-width="1.3" stroke-linecap="round" opacity="0.7" />
+            </g>
+            <g class="b-arm b-arm-front">
+              <path d="M676 376 C656 400 646 440 644 470 C644 482 650 490 660 492 L672 478 C664 462 668 430 684 404 Z" fill="url(#c-choli)" />
+              {[0, 1, 2, 3, 4].map((k) => <path d={`M${648 + k * 2} ${452 + k * 6} q12 3 22 -2`} fill="none" stroke={k % 2 ? '#f3e7d2' : '#b3122e'} stroke-width="5" stroke-linecap="round" />)}
+              <g class="b-kaleere">
+                <path d="M652 486 l-6 30 l8 -4 l6 6 z M662 488 l2 34 l6 -6 l7 3 z" fill="url(#c-gold)" />
+              </g>
+              <ellipse cx="660" cy="490" rx="14" ry="11" fill="url(#c-skin-b)" />
+              <path d="M654 488 l4 3 M660 486 l3 4" stroke="#8a3d1e" stroke-width="1.3" stroke-linecap="round" opacity="0.7" />
+            </g>
+          </g>
+
+          <!-- Garlands in hand, exchanged on scroll -->
+          <g class="wd-garland g-held">
+            {groomHeld.map((f) => <use href="#bloom" x={f.x - f.r} y={f.y - f.r} width={f.r * 2} height={f.r * 2} fill={`url(#f-${f.kind})`} />)}
+            <path d="M563 616 l-6 22 l6 -6 l6 6 z" fill="url(#c-gold)" />
+          </g>
+          <g class="wd-garland b-held">
+            {brideHeld.map((f) => <use href="#bloom" x={f.x - f.r} y={f.y - f.r} width={f.r * 2} height={f.r * 2} fill={`url(#f-${f.kind})`} />)}
+            <path d="M657 624 l-6 22 l6 -6 l6 6 z" fill="url(#c-gold)" />
+          </g>
+
+          <path class="wd-knot" d="M562 700 C590 790 640 790 660 652" fill="none" stroke="#e8b04a" stroke-width="7" stroke-linecap="round" />
+          <circle class="wd-knot-dot" cx="603" cy="760" r="9" fill="url(#c-gold)" />
+
+          <g class="wd-burst wd-burst-g" transform="translate(488 380)">{bursts.map((b) => <circle cx={Math.cos(b.a) * b.d} cy={Math.sin(b.a) * b.d} r="6" fill={b.c} />)}</g>
+          <g class="wd-burst wd-burst-b" transform="translate(727 400)">{bursts.map((b) => <circle cx={Math.cos(b.a) * b.d} cy={Math.sin(b.a) * b.d} r="6" fill={b.c} />)}</g>
+
+          <g class="wd-diyas">
+            {diyas.map((x) => (
+              <g>
+                <ellipse class="wd-diya-glow" cx={x} cy="938" rx="34" ry="22" fill="url(#c-flame)" opacity="0.6" />
+                <path d={`M${x - 20} 946 Q${x} 966 ${x + 20} 946 Z`} fill="#b5552b" />
+                <path class="wd-flame" d={`M${x} 914 C${x + 7} 928 ${x + 7} 940 ${x} 944 C${x - 7} 940 ${x - 7} 928 ${x} 914 Z`} fill="url(#c-flame)" />
+              </g>
+            ))}
+          </g>
+
+          <g class="wd-petals" aria-hidden="true">
+            {petals.map((p) => <ellipse class="wd-petal" cx={p.x} cy="-30" rx={7 * p.s} ry={4.5 * p.s} fill={p.kind} style={`--d:${p.dur}s;--delay:${p.delay}s`} />)}
+          </g>
+        </svg>
+        <p class="wd-step" aria-hidden="true"><span class="is-on">Varmala</span><span>Gathbandhan</span><span>Shubh vivah</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .wd-couple { position: relative; padding: 5rem clamp(1rem, 3vw, 3rem) 0; }
+  .wd-couple-card {
+    position: relative; overflow: hidden; display: grid; gap: 1rem; padding: 2.5rem 1.25rem 0; border-radius: 28px; border: 1px solid #f0dcc4;
+    background:
+      radial-gradient(80% 60% at 75% 40%, rgb(255 236 214 / 0.95), transparent 70%),
+      radial-gradient(60% 50% at 10% 100%, rgb(250 214 222 / 0.55), transparent 70%),
+      linear-gradient(160deg, #fffaf2, #fbefe4);
+  }
+  .wd-shubh { font-family: var(--wd-serif), 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', 'Mangal', serif; font-size: 1.5rem; font-weight: 600; color: var(--wd-gold); letter-spacing: 0.02em; }
+  .wd-couple-title { margin-top: 0.4rem; font-size: clamp(2.4rem, 4.6vw, 4.4rem); }
+  .wd-couple-title :global(em) { font-family: var(--wd-serif); font-style: italic; font-weight: 600; color: var(--wd-maroon); }
+  .wd-services { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .wd-services li { padding: 0.4rem 0.85rem; border-radius: 999px; border: 1px solid #ecd6bb; background: rgb(255 255 255 / 0.75); font-size: 0.86rem; color: rgb(20 20 22 / 0.78); }
+  .wd-cta { background: var(--wd-maroon); color: #fff; box-shadow: 0 12px 30px -14px var(--wd-maroon); }
+  .wd-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; border-top: 1px solid #ecd6bb; padding-top: 1.25rem; }
+  .wd-facts div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.2rem; }
+  .wd-facts dt { font-size: 0.78rem; color: rgb(20 20 22 / 0.58); }
+  .wd-facts dd { font-family: var(--font-display); font-weight: 600; font-size: clamp(1rem, 1.6vw, 1.35rem); letter-spacing: -0.02em; color: var(--wd-maroon); }
+
+  .wd-couple-art { position: relative; margin: 0 -1.25rem; }
+  .wd-couple-art svg { display: block; width: 100%; height: auto; }
+  .wd-step { position: absolute; left: 50%; bottom: 1.2rem; transform: translateX(-50%); display: grid; text-align: center; }
+  .wd-step span {
+    grid-area: 1 / 1; padding: 0.35rem 0.9rem; border-radius: 999px; background: rgb(255 250 242 / 0.85); backdrop-filter: blur(6px);
+    font-family: var(--wd-serif); font-style: italic; font-weight: 600; font-size: 1.15rem; color: var(--wd-maroon); opacity: 0; white-space: nowrap;
+  }
+  .wd-step span.is-on { opacity: 1; }
+
+  .wd-arch-flower, .wd-garland, .wd-burst, .g-kalgi, .g-tail, .b-veil-back, .b-kaleere, .b-jhumka, .wd-flame { transform-box: fill-box; }
+  .wd-arch-flower { transform-origin: center; }
+  .wd-mandala { transform-origin: 600px 500px; animation: wd-spin 140s linear infinite; }
+  .g-tail { transform-origin: top center; animation: wd-sway 5s ease-in-out infinite; }
+  .g-kalgi { transform-origin: bottom center; animation: wd-sway 3.6s ease-in-out infinite; }
+  .b-veil-back { transform-origin: top center; animation: wd-veil 6s ease-in-out infinite; }
+  .b-kaleere { transform-origin: top center; animation: wd-swing 2.4s ease-in-out infinite; }
+  .b-jhumka { transform-origin: top center; animation: wd-swing 3s ease-in-out infinite; }
+  .wd-flame { transform-origin: bottom center; animation: wd-flicker 1.2s ease-in-out infinite alternate; }
+  .wd-diya-glow { animation: wd-glow 1.6s ease-in-out infinite alternate; }
+  .wd-petal { animation: wd-fall var(--d) linear var(--delay) infinite; }
+  .wd-burst { opacity: 0; }
+  .wd-knot { stroke-dasharray: 260; stroke-dashoffset: 0; }
+
+  @keyframes wd-spin { to { transform: rotate(360deg); } }
+  @keyframes wd-sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+  @keyframes wd-veil { 0%, 100% { transform: skewX(-1.2deg); } 50% { transform: skewX(1.4deg); } }
+  @keyframes wd-swing { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+  @keyframes wd-flicker { from { transform: scale(0.92, 0.88); } to { transform: scale(1.06, 1.1); } }
+  @keyframes wd-glow { from { opacity: 0.45; } to { opacity: 0.75; } }
+  @keyframes wd-fall {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    8% { opacity: 1; }
+    50% { transform: translate(40px, 540px) rotate(220deg); }
+    92% { opacity: 1; }
+    100% { transform: translate(-30px, 1080px) rotate(440deg); opacity: 0; }
+  }
+
+  /* Before the varmala: garlands in hand; the exchange is scroll-driven when motion is allowed. */
+  :global(.js-motion) .g-worn, :global(.js-motion) .b-worn { opacity: 0; }
+  :global(.js-motion) .wd-knot { stroke-dashoffset: 260; }
+  :global(.js-motion) .wd-knot-dot { opacity: 0; }
+  :global(html:not(.js-motion)) .g-held, :global(html:not(.js-motion)) .b-held { display: none; }
+  :global(html:not(.js-motion)) .wd-petals { display: none; }
+  :global(html:not(.js-motion)) .wd-step span { opacity: 0; }
+  :global(html:not(.js-motion)) .wd-step span:last-child { opacity: 1; }
+
+  /* Phones: crop the wide artwork so the couple fills the width, caption under their feet. */
+  @media (max-width: 1023px) {
+    .wd-couple-art { overflow: hidden; }
+    .wd-couple-art svg { width: 156%; margin-left: -28%; }
+    .wd-step { position: relative; left: auto; bottom: auto; transform: none; justify-content: center; margin: -0.5rem auto 1.75rem; }
+  }
+
+  @media (min-width: 1024px) {
+    :global(.js-motion) .wd-couple { height: 300svh; padding-top: 0; }
+    :global(.js-motion) .wd-couple-sticky { position: sticky; top: 0; height: 100svh; display: flex; align-items: center; padding: 5.5rem 0 1.5rem; }
+    :global(.js-motion) .wd-couple-card { height: 100%; width: 100%; }
+    .wd-couple-card { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); align-items: center; padding: 0 0 0 clamp(2rem, 4vw, 4rem); }
+    .wd-couple-art { margin: 0; height: 100%; display: flex; align-items: flex-end; }
+    .wd-couple-art svg { height: 100%; max-height: 100%; }
+  }
+</style>

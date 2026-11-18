@@ -1,0 +1,318 @@
+---
+import '@fontsource-variable/cormorant-garamond';
+import '@fontsource-variable/cormorant-garamond/wght-italic.css';
+import { wedding } from '../data/site';
+import { PALETTE } from '../scripts/wedding/chapters';
+import WeddingCouple from './WeddingCouple.astro';
+
+const { chapters, vows } = wedding;
+// Starting colours; the script blends them per function as the visitor scrolls.
+const startColours = Object.entries(PALETTE[0]).map(([k, v]) => `--wd-${k}:${v}`).join(';');
+const cardColours = (i: number) => `--own-tint:${PALETTE[i].tint};--own-ink:${PALETTE[i].ink};--own-soft:${PALETTE[i].soft}`;
+// Poster shown while the 3D scene loads, and as the fallback without WebGL. Its colours follow the same palette.
+const arches = Array.from({ length: 11 }, (_, i) => 330 + i * 86);
+const laris = Array.from({ length: 15 }, (_, i) => 640 + i * 23);
+const lights = Array.from({ length: 7 }, (_, i) => i);
+
+// Page-turn mandala and the Mehendi henna corners (drawn on scroll).
+const rot = (n: number, step: number, from = 0) => Array.from({ length: n }, (_, i) => from + i * step);
+const polar = (r: number, deg: number) => {
+  const a = (deg * Math.PI) / 180;
+  return `${(Math.cos(a) * r).toFixed(1)} ${(Math.sin(a) * r).toFixed(1)}`;
+};
+const hennaPetals = [10, 26, 42, 58, 74].map((d) => `M${polar(138, d)} Q${polar(160, d - 7)} ${polar(180, d)} Q${polar(160, d + 7)} ${polar(138, d)}`);
+const hennaLines = [
+  'M0 70 A70 70 0 0 0 70 0', 'M0 104 A104 104 0 0 0 104 0', 'M0 136 A136 136 0 0 0 136 0', ...hennaPetals,
+  'M150 28 C196 26 226 56 242 98 C256 134 292 150 336 146 c10 -2 14 8 6 12 c-6 3 -10 -4 -5 -6',
+  'M246 112 C228 100 226 76 244 70 C266 64 280 90 268 118 C260 136 242 144 228 138',
+  'M190 36 q14 -16 30 -6 q-14 16 -30 6z', 'M296 152 q16 -12 30 0 q-16 12 -30 0z',
+  'M28 150 C26 196 56 226 98 242 C134 256 150 292 146 336 c-2 10 8 14 12 6 c3 -6 -4 -10 -6 -5',
+  'M112 246 C100 228 76 226 70 244 C64 266 90 280 118 268 C136 260 144 242 138 228',
+  'M36 190 q-16 14 -6 30 q16 -14 6 -30z', 'M152 296 q-12 16 0 30 q12 -16 0 -30z',
+];
+const hennaDots = [...rot(7, 13, 6).map((d) => polar(120, d)), ...rot(9, 9, 5).map((d) => polar(196, d))];
+---
+
+<section id="weddings" class="wedding relative" aria-labelledby="wedding-title" data-chapter="0" style={startColours}>
+  <div class="wrap pt-20 text-center sm:pt-28">
+    <p class="eyebrow justify-center" data-reveal>Weddings</p>
+    <h2 id="wedding-title" class="h2 wd-title mt-4" data-split>From boardrooms to <em>baraats</em>.</h2>
+    <p class="mx-auto mt-6 max-w-xl text-lg text-ink/65" data-reveal>
+      The team behind 1000+ events now plans weddings across India. Haldi to reception, every function, one crew.
+    </p>
+  </div>
+
+  <div class="wd-journey mt-12 sm:mt-16">
+    <div class="wd-stage">
+      <div class="wd-view">
+        <svg class="wd-poster" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="wd-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" style="stop-color: var(--wd-sky1)" /><stop offset="1" style="stop-color: var(--wd-sky2)" />
+            </linearGradient>
+            <linearGradient id="wd-floor" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" style="stop-color: var(--wd-ground)" /><stop offset="1" stop-color="#fbf6ee" />
+            </linearGradient>
+            <radialGradient id="wd-orb"><stop offset="0" stop-color="#fffaf0" /><stop offset="0.6" stop-color="#fff3d6" stop-opacity="0.9" /><stop offset="1" stop-color="#fff3d6" stop-opacity="0" /></radialGradient>
+          </defs>
+          <rect width="1600" height="900" fill="url(#wd-sky)" />
+          <circle cx="1270" cy="190" r="120" fill="url(#wd-orb)" />
+          <g fill="#f0d8b4">
+            <rect x="290" y="330" width="1020" height="300" />
+            <rect x="640" y="250" width="320" height="380" />
+            <path d="M700 250 Q800 110 900 250 Z" />
+            <rect x="240" y="300" width="90" height="330" /><rect x="1270" y="300" width="90" height="330" />
+            <path d="M240 300 Q285 230 330 300 Z M1270 300 Q1315 230 1360 300 Z" />
+          </g>
+          <g style="fill: var(--wd-drape2)" opacity="0.45">
+            {arches.map((x) => <path d={`M${x} 610 v-70 q22 -40 44 0 v70 z`} />)}
+          </g>
+          <g fill="none" stroke="#fff6d8" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 22" opacity="0.9">
+            {lights.map((i) => <path d={`M800 300 Q${520 + i * 95} ${360 + (i % 2) * 30} ${120 + i * 226} 330`} />)}
+          </g>
+          <rect x="0" y="600" width="1600" height="300" fill="url(#wd-floor)" />
+          <path d="M760 900 L790 640 L810 640 L840 900 Z" fill="#9b1026" />
+          <g>
+            <rect x="560" y="610" width="480" height="34" rx="4" fill="#fbf7ef" />
+            <rect x="590" y="590" width="420" height="24" rx="3" fill="#fffdf8" />
+            {[612, 760, 840, 988].map((x) => <rect x={x - 9} y="440" width="18" height="152" rx="6" fill="#f6ecdb" />)}
+            <path d="M622 446 C640 500 616 540 636 592 L606 592 C618 540 600 500 604 446 Z M978 446 C960 500 984 540 964 592 L994 592 C982 540 1000 500 996 446 Z" style="fill: var(--wd-drape)" />
+            <path d="M650 446 C690 470 720 470 760 446 Z M840 446 C880 470 910 470 950 446 Z" style="fill: var(--wd-drape2)" />
+            <rect x="590" y="424" width="420" height="22" fill="#d9a646" />
+            <path d="M640 424 Q800 300 960 424 Z" fill="#fbf4e8" />
+            <path d="M796 318 l4 -26 l4 26 z" fill="#d9a646" />
+            {laris.map((x, i) => <line x1={x} y1="446" x2={x} y2={474 + Math.abs(7 - i) * 6} stroke-width="7" stroke-dasharray="0.1 9" stroke-linecap="round" style={`stroke: var(${i % 3 === 1 ? '--wd-drape2' : '--wd-flower'})`} />)}
+            <path d="M600 452 Q700 506 800 456 Q900 506 1000 452" fill="none" stroke-width="9" stroke-dasharray="0.1 10" stroke-linecap="round" style="stroke: var(--wd-flower)" />
+          </g>
+        </svg>
+        <canvas class="wd-canvas" aria-hidden="true"></canvas>
+        <div class="wd-wash" aria-hidden="true"></div>
+        <div class="wd-vignette" aria-hidden="true"></div>
+        <div class="wd-henna" aria-hidden="true">
+          {['is-left', 'is-right'].map((side) => (
+            <svg class={`wd-henna-corner ${side}`} viewBox="0 0 360 360">
+              <g class="wd-henna-under">{hennaLines.map((d) => <path d={d} pathLength="1" />)}</g>
+              <g class="wd-henna-ink">{hennaLines.map((d) => <path d={d} pathLength="1" />)}</g>
+              <g class="wd-henna-dots">{hennaDots.map((xy) => <circle cx={xy.split(' ')[0]} cy={xy.split(' ')[1]} r="3.2" />)}</g>
+            </svg>
+          ))}
+        </div>
+        <div class="wd-portal" aria-hidden="true">
+          <div class="wd-portal-disc"></div>
+          <svg class="wd-portal-mandala" viewBox="-220 -220 440 440">
+            <g fill="none" stroke="currentColor" stroke-width="1.6">
+              <circle r="212" /><circle r="172" stroke-dasharray="3 9" /><circle r="132" /><circle r="70" />
+              {rot(24, 15).map((a) => <ellipse cx="0" cy="-192" rx="13" ry="30" transform={`rotate(${a})`} />)}
+              {rot(16, 22.5).map((a) => <path d="M0 -150 Q14 -130 0 -108 Q-14 -130 0 -150Z" transform={`rotate(${a})`} />)}
+              {rot(8, 45).map((a) => <path d="M0 -66 L10 -30 L0 -12 L-10 -30 Z" transform={`rotate(${a})`} />)}
+            </g>
+            <g fill="currentColor">{rot(36, 10).map((a) => <circle cx="0" cy="-96" r="2.6" transform={`rotate(${a})`} />)}</g>
+          </svg>
+          {chapters.map((c, i) => (
+            <div class="wd-portal-page" data-page={i}>
+              <span class="wd-portal-no">0{i + 1} · {c.time}</span>
+              <span class="wd-portal-title">{c.title}</span>
+              <span class="wd-portal-mood">{c.mood}</span>
+            </div>
+          ))}
+        </div>
+        <div class="wd-labels" aria-hidden="true">
+          {chapters.map((c, i) => c.labels.map((l) => (
+            <span class="wd-label" data-anchor={l.anchor} data-chapter={i}><span class="wd-label-dot"></span><span class="wd-label-text">{l.text}</span></span>
+          )))}
+        </div>
+        <div class="wd-progress" aria-hidden="true"><span></span></div>
+        <p class="wd-hint" aria-hidden="true">Scroll to walk through the wedding day</p>
+      </div>
+
+      <nav class="wd-rail" aria-label="Wedding functions">
+        <ol>
+          {chapters.map((c, i) => (
+            <li>
+              <button type="button" data-goto={i} aria-current={i === 0 ? 'step' : 'false'}>
+                <span class="wd-rail-num">0{i + 1}</span><span class="wd-rail-name">{c.title}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
+
+      <div class="wd-cards">
+        {chapters.map((c, i) => (
+          <article class={`wd-card${i === 0 ? ' is-active' : ''}`} data-card={i} aria-labelledby={`wd-card-${c.id}`} style={cardColours(i)}>
+            <p class="wd-time"><span>0{i + 1}</span>{c.time}</p>
+            <h3 id={`wd-card-${c.id}`} class="wd-card-title">{c.title}</h3>
+            <p class="wd-card-text">{c.text}</p>
+            {c.id === 'pheras' && (
+              <p class="wd-phera" aria-live="polite">
+                <span class="wd-phera-head"><span data-phera>Phera 1 of 7</span><span class="wd-phera-dots" aria-hidden="true">{Array.from({ length: 7 }, (_, k) => <i class={k === 0 ? 'is-on' : ''}></i>)}</span></span>
+                <span class="wd-vow" data-vow>{vows[0]}</span>
+              </p>
+            )}
+            <ul class="wd-chips">{c.items.map((it) => <li>{it}</li>)}</ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <WeddingCouple />
+</section>
+
+<style>
+  .wedding {
+    --wd-maroon: #7a1027;
+    --wd-rose: #b4214f;
+    --wd-gold: #c9952b;
+    --wd-ivory: #fff9f0;
+    --wd-serif: 'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, serif;
+  }
+  .wd-title :global(em), .wedding :global(.wd-serif-em) { font-family: var(--wd-serif); font-style: italic; font-weight: 600; color: var(--wd-maroon); letter-spacing: -0.01em; }
+
+  /* Base layout (no motion): a framed scene with the five functions listed under it. */
+  .wd-stage { position: relative; }
+  .wd-view {
+    position: relative; height: min(76svh, 760px); margin-inline: clamp(1rem, 3vw, 3rem); overflow: hidden;
+    border-radius: 28px; background: #f3e6cd; isolation: isolate;
+  }
+  .wd-poster, .wd-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .wd-canvas { opacity: 0; transition: opacity 1s ease; }
+  .wd-stage.is-ready .wd-canvas { opacity: 1; }
+  :global(.wd-nogl) .wd-canvas { display: none; }
+  .wd-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(20 10 10 / 0.22)); }
+  /* Colour wash in the current function's colour, strongest while moving between functions. */
+  .wd-wash {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.15; mix-blend-mode: soft-light;
+    background:
+      radial-gradient(110% 70% at 50% 108%, var(--wd-tint), transparent 62%),
+      radial-gradient(90% 60% at 50% -12%, var(--wd-drape2), transparent 66%);
+  }
+  /* Page turn between functions (positions and sizes are driven by the scroll script). */
+  .wd-portal {
+    position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; visibility: hidden; --disc: 0; --hole: 0;
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--hole) * 1vmax), #000 calc(var(--hole) * 1vmax + 1px));
+    mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--hole) * 1vmax), #000 calc(var(--hole) * 1vmax + 1px));
+  }
+  .wd-portal-disc {
+    position: absolute; left: 50%; top: 50%; width: 160vmax; height: 160vmax; margin: -80vmax 0 0 -80vmax; border-radius: 50%;
+    background: radial-gradient(circle, var(--pt-soft) 0 26%, var(--pt-tint) 74%, var(--pt-ink) 100%);
+    background: radial-gradient(circle, var(--pt-soft) 0 22%, color-mix(in srgb, var(--pt-soft) 40%, var(--pt-tint)) 46%, var(--pt-tint) 70%, var(--pt-ink) 100%);
+    transform: scale(var(--disc));
+  }
+  .wd-portal-mandala { position: absolute; left: 50%; top: 50%; width: min(80vmin, 660px); height: min(80vmin, 660px); color: #b8862b; opacity: 0.5; transform: translate(-50%, -50%); }
+  .wd-portal-page {
+    position: absolute; left: 50%; top: 50%; display: none; flex-direction: column; align-items: center; gap: 0.7rem; width: max-content; max-width: 92vw;
+    text-align: center; color: var(--pt-ink); transform: translate(-50%, -50%); will-change: transform, opacity;
+  }
+  .wd-portal-page.is-on { display: flex; }
+  .wd-portal-no { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; }
+  .wd-portal-title { font-family: var(--wd-serif); font-style: italic; font-weight: 600; font-size: clamp(4.6rem, 13vw, 12rem); line-height: 0.95; letter-spacing: -0.01em; }
+  .wd-portal-mood { max-width: 30ch; font-size: clamp(1rem, 1.6vw, 1.3rem); line-height: 1.4; opacity: 0.85; }
+
+  /* Mehendi: henna vines in the corners, drawn by the scroll (pathLength 1). */
+  .wd-henna { position: absolute; inset: 0; pointer-events: none; visibility: hidden; --henna: 0; }
+  .wd-henna-corner { position: absolute; top: 0.75rem; width: min(30vw, 300px); height: auto; overflow: visible; }
+  .wd-henna-corner.is-left { left: 0.75rem; }
+  .wd-henna-corner.is-right { right: 0.75rem; transform: scaleX(-1); }
+  @media (max-width: 1023px) { .wd-henna-corner { top: 8.6rem; width: min(34vw, 260px); } }
+  .wd-henna-corner path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: calc(1 - var(--henna)); }
+  .wd-henna-under path { stroke: rgb(255 255 255 / 0.8); stroke-width: 6; }
+  .wd-henna-ink path { stroke: #7a2e0e; stroke-width: 2.4; }
+  .wd-henna-dots circle { fill: #7a2e0e; stroke: rgb(255 255 255 / 0.8); stroke-width: 1.5; opacity: calc(var(--henna) * 2.2 - 1.2); }
+  :global(html:not(.js-motion)) .wd-portal, :global(html:not(.js-motion)) .wd-henna { display: none; }
+
+  .wd-labels { position: absolute; inset: 0; pointer-events: none; }
+  .wd-label {
+    position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;
+    opacity: 0; transition: opacity 0.5s var(--ease-out); will-change: transform;
+  }
+  .wd-label.is-on { opacity: 1; }
+  .wd-label-dot { width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 4px rgb(255 255 255 / 0.35), 0 0 18px 4px rgb(255 214 140 / 0.7); }
+  .wd-label-text {
+    transform: translateY(-50%); margin-top: -6px; padding: 0.35rem 0.75rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+    color: var(--color-ink); background: rgb(255 250 242 / 0.88); backdrop-filter: blur(8px); box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.5);
+  }
+  :global(.wd-nogl) .wd-labels { display: none; }
+
+  .wd-progress, .wd-hint { z-index: 3; }
+  .wd-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgb(255 255 255 / 0.25); }
+  .wd-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--wd-tint), var(--wd-drape2)); transform-origin: left; transform: scaleX(0); }
+  .wd-hint {
+    position: absolute; left: 50%; bottom: 1.5rem; transform: translateX(-50%); padding: 0.45rem 0.95rem; border-radius: 999px;
+    font-size: 0.82rem; font-weight: 500; color: var(--color-ink); background: rgb(255 250 242 / 0.8); backdrop-filter: blur(8px);
+    transition: opacity 0.6s; display: none;
+  }
+
+  .wd-rail { margin: 1rem clamp(1rem, 3vw, 3rem) 0; }
+  .wd-rail ol { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+  .wd-rail ol::-webkit-scrollbar { display: none; }
+  .wd-rail button {
+    display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0 1rem; border-radius: 999px; white-space: nowrap;
+    border: 1px solid rgb(20 20 22 / 0.12); background: rgb(255 255 255 / 0.8); font-size: 0.92rem; font-weight: 500;
+    transition: background-color 0.4s var(--ease-out), color 0.4s, border-color 0.4s;
+  }
+  .wd-rail button:hover { border-color: var(--wd-tint); }
+  .wd-rail button[aria-current='step'] { background: var(--wd-ink); border-color: var(--wd-ink); color: #fff; }
+  .wd-rail-num { font-size: 0.72rem; font-weight: 700; color: var(--wd-tint); }
+
+  .wd-cards { display: grid; gap: 12px; margin: 1rem clamp(1rem, 3vw, 3rem) 0; }
+  @media (min-width: 768px) { .wd-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1200px) { .wd-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  /* Static cards use their own function's colours; during the scroll journey they follow the blend. */
+  .wd-card {
+    --c-tint: var(--own-tint); --c-ink: var(--own-ink); --c-soft: var(--own-soft);
+    position: relative; overflow: hidden; padding: 1.5rem 1.4rem 1.5rem; border-radius: 22px; border: 1px solid var(--color-line);
+    background: linear-gradient(165deg, var(--c-soft), rgb(255 252 247 / 0.94) 62%);
+  }
+  .wd-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, var(--c-tint), var(--c-ink)); }
+  .wd-time { display: flex; align-items: center; gap: 0.6rem; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: rgb(20 20 22 / 0.6); }
+  .wd-time span { color: var(--c-tint); }
+  .wd-card-title { margin-top: 0.35rem; font-family: var(--wd-serif); font-style: italic; font-weight: 600; font-size: clamp(2.4rem, 3.4vw, 3.2rem); line-height: 1; color: var(--c-ink); letter-spacing: -0.01em; }
+  .wd-card-text { margin-top: 0.7rem; font-size: 0.98rem; line-height: 1.55; color: rgb(20 20 22 / 0.72); }
+  .wd-phera { display: flex; flex-direction: column; gap: 0.15rem; margin-top: 0.9rem; padding: 0.7rem 0.9rem; border-radius: 14px; background: #fdf0e3; border: 1px solid #f4d9b8; }
+  .wd-phera [data-phera] { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink); }
+  .wd-phera-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+  .wd-phera-dots { display: inline-flex; gap: 0.3rem; }
+  .wd-phera-dots i { width: 0.55rem; height: 0.55rem; border-radius: 999px; border: 1.5px solid var(--c-ink); transition: background-color 0.3s; }
+  .wd-phera-dots i.is-on { background: var(--c-ink); }
+  .wd-vow { font-family: var(--wd-serif); font-style: italic; font-size: 1.2rem; font-weight: 600; color: var(--color-ink); }
+  .wd-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+  .wd-chips li { padding: 0.3rem 0.75rem; border-radius: 999px; border: 1px solid var(--c-tint); background: rgb(255 255 255 / 0.85); font-size: 0.82rem; color: rgb(20 20 22 / 0.78); }
+
+  /* Scroll journey: the scene pins while the five functions play out over the scroll. */
+  :global(.js-motion) .wd-journey { height: 480svh; }
+  :global(.js-motion) .wd-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+  :global(.js-motion) .wd-view { position: absolute; inset: 0; height: auto; margin: 0; border-radius: 0; transform-origin: 50% 30%; }
+  :global(.js-motion) .wd-hint { display: block; }
+  :global(.js-motion .wd-started) .wd-hint { opacity: 0; }
+
+  :global(.js-motion) .wd-cards { position: absolute; inset: auto 0 0 0; display: block; margin: 0; padding: 0 1rem 1.25rem; pointer-events: none; opacity: var(--wd-ui, 1); }
+  :global(.js-motion) .wd-labels { opacity: var(--wd-ui, 1); }
+  :global(.js-motion) .wd-card {
+    --c-tint: var(--wd-tint); --c-ink: var(--wd-ink); --c-soft: var(--wd-soft);
+    position: absolute; left: 1rem; right: 1rem; bottom: 1.4rem; padding: 1.1rem 1.2rem 1.2rem; border-color: rgb(255 255 255 / 0.6);
+    background: linear-gradient(165deg, var(--c-soft), rgb(255 251 245 / 0.88) 60%); backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 30px 60px -30px rgb(30 10 10 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.4);
+    opacity: 0; transform: translateY(24px); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out); visibility: hidden;
+  }
+  :global(.js-motion) .wd-card.is-active { opacity: 1; transform: none; visibility: visible; pointer-events: auto; }
+  :global(.js-motion) .wd-card-text { font-size: 0.92rem; }
+  :global(.js-motion) .wd-card-title { font-size: 2.3rem; }
+  @media (max-width: 639px) { :global(.js-motion) .wd-card .wd-chips { display: none; } }
+
+  :global(.js-motion) .wd-rail { position: absolute; top: 5.5rem; left: 0; right: 0; margin: 0; padding: 0 1rem; z-index: 2; opacity: var(--wd-ui, 1); }
+  :global(.js-motion) .wd-rail button { min-height: 2.4rem; padding: 0 0.8rem; font-size: 0.82rem; background: rgb(255 250 242 / 0.75); backdrop-filter: blur(10px); border-color: rgb(255 255 255 / 0.5); }
+  :global(.js-motion) .wd-rail button[aria-current='step'] { background: var(--wd-ink); border-color: var(--wd-ink); }
+  :global(.js-motion) .wd-hint { bottom: auto; top: 50%; }
+
+  @media (min-width: 1024px) {
+    :global(.js-motion) .wd-cards { padding: 0; }
+    :global(.js-motion) .wd-card { left: clamp(1.5rem, 4vw, 4rem); right: auto; bottom: clamp(2rem, 6vh, 4rem); width: min(27rem, 34vw); padding: 1.6rem 1.7rem 1.7rem; }
+    :global(.js-motion) .wd-card-title { font-size: 3.4rem; }
+    :global(.js-motion) .wd-card-text { font-size: 1rem; }
+    :global(.js-motion) .wd-rail { top: 50%; left: auto; right: clamp(1.5rem, 3vw, 3rem); width: auto; padding: 0; transform: translateY(-50%); }
+    :global(.js-motion) .wd-rail ol { flex-direction: column; overflow: visible; gap: 0.35rem; }
+    :global(.js-motion) .wd-rail button { width: 100%; justify-content: flex-start; min-height: 2.6rem; padding: 0 1rem 0 0.9rem; font-size: 0.9rem; }
+    :global(.js-motion) .wd-hint { top: auto; bottom: 1.6rem; }
+  }
+</style>
