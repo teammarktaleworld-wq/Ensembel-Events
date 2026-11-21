@@ -1,7 +1,7 @@
 import {
   Color, DirectionalLight, Fog, HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, NeutralToneMapping,
   PCFShadowMap, PerspectiveCamera, PlaneGeometry, PMREMGenerator, Quaternion, Scene, Shape, ShapeGeometry, SpotLight,
-  SRGBColorSpace, Vector3, WebGLRenderer, type Texture,
+  SRGBColorSpace, Vector3, WebGLRenderer, type Object3D, type Texture,
 } from 'three';
 import { carpet, flame, glow, marbleTiles, rangoli, sandstone } from './textures';
 import { createMaterials, FlowerBatch, GlowPoints, palette } from './builders';
@@ -57,7 +57,10 @@ export function createWeddingScene(canvas: HTMLCanvasElement, opts: Options): We
   const high = opts.quality === 'high';
   // Kept deliberately light: no post-processing buffers, capped resolution, small shadow map.
   const renderer = new WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, high ? 1.5 : 1.25));
+  const basePR = Math.min(window.devicePixelRatio || 1, high ? 1.5 : 1.25);
+  renderer.setPixelRatio(basePR);
+  // Shader error checks make the browser wait for every shader compile (a stall); not needed in production.
+  renderer.debug.checkShaderErrors = import.meta.env.DEV;
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = NeutralToneMapping;
   renderer.shadowMap.enabled = high;
@@ -65,6 +68,8 @@ export function createWeddingScene(canvas: HTMLCanvasElement, opts: Options): We
 
   let lost = false;
   let ready = false;
+  // True until every shader has been compiled in the background (see the warm-up below).
+  let warming = true;
   const onLost = (e: Event) => {
     e.preventDefault();
     lost = true;
@@ -117,7 +122,7 @@ export function createWeddingScene(canvas: HTMLCanvasElement, opts: Options): We
   const stars = buildStars(glowTex);
   scene.add(stars.points);
   const fire = buildFire(new Vector3(0, PLATFORM_TOP + 0.36, 0), glowTex);
-  scene.add(fire.group);
+  scene.add(fire.group, fire.light);
   const petals = buildPetals(high ? 520 : 220, high ? 320 : 150);
   scene.add(petals.falling, petals.rest);
   const beams = buildBeams();
@@ -307,7 +312,7 @@ export function createWeddingScene(canvas: HTMLCanvasElement, opts: Options): We
   const pheraPhase = (L: number) => clamp01((L + 0.6) / 1.2);
 
   function render() {
-    if (lost) return;
+    if (lost || warming) return;
     renderer.render(scene, camera);
     if (!ready && !renderer.getContext().isContextLost()) {
       ready = true;
@@ -329,9 +334,29 @@ export function createWeddingScene(canvas: HTMLCanvasElement, opts: Options): We
     opts.onFrame({ progress, chapter: ch, phera, labels });
   }
 
+  // Adaptive resolution: if the device cannot keep up (slow frames for about a second), render fewer pixels,
+  // down to 75%; step back up when there is headroom. Fast devices never leave full resolution.
+  let frameAvg = 16;
+  let prScale = 1;
+  let sinceAdjust = 0;
+  function adapt(ms: number) {
+    frameAvg += (Math.min(ms, 100) - frameAvg) * 0.05;
+    if (++sinceAdjust < 60) return;
+    let next = prScale;
+    if (frameAvg > 22 && prScale > 0.75) next = Math.max(0.75, prScale - 0.1);
+    else if (frameAvg < 14 && prScale < 1) next = Math.min(1, prScale + 0.05);
+    if (next !== prScale) {
+      prScale = next;
+      renderer.setPixelRatio(basePR * prScale);
+      resize();
+      sinceAdjust = 0;
+    }
+  }
+
   function frame(now: number) {
     raf = requestAnimationFrame(frame);
     const dt = Math.min((now - last) / 1000, 0.05);
+    adapt(now - last);
     last = now;
     time += dt;
     frameNo++;
@@ -373,6 +398,39 @@ export function createWeddingScene(canvas: HTMLCanvasElement, opts: Options): We
 
   resize();
   update(0);
+
+  // Warm-up, before the visitor reaches the section: compile every shader of every function now, including
+  // objects that only appear later (the couple, fireworks, beams), in parallel where the browser supports it.
+  // Without this, shaders compiled mid-scroll and froze the page for seconds. The poster shows until it is done.
+  // Shaders are queued in small batches, one batch per idle moment, and nothing waits on the driver in between:
+  // queuing them all at once (compileAsync) made the page wait ~2 s for the whole queue in one go.
+  const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(() => fn(), { timeout: 300 }) : setTimeout(fn, 32));
+  const drawables: Object3D[] = [];
+  scene.traverse((o) => { if ((o as Mesh).material) drawables.push(o); });
+  const BATCH = 6;
+  let at = 0;
+  const finish = () => {
+    // Build the other functions' reflection maps one at a time, then allow drawing.
+    let i = 1;
+    const nextEnv = () => {
+      if (lost) return;
+      if (i < CHAPTER_AT.length) { envFor(i++); idle(nextEnv); return; }
+      warming = false;
+      if (!running) { update(0); render(); emit(); }
+    };
+    idle(nextEnv);
+  };
+  const compileNext = () => {
+    if (lost) return;
+    if (at >= drawables.length) { idle(finish); return; }
+    const batch = drawables.slice(at, at += BATCH);
+    // compile() only needs traverse/traverseVisible from the object it compiles; lights, fog and the
+    // environment come from the real scene (third argument), so the programs match what render() will use.
+    const part = { traverse: (cb: (o: Object3D) => void) => batch.forEach(cb), traverseVisible: () => {} } as unknown as Object3D;
+    try { renderer.compile(part, camera, scene); } catch { /* compiled on first draw instead */ }
+    idle(compileNext);
+  };
+  idle(compileNext);
 
   return {
     setTarget(p) { target = clamp01(p); },

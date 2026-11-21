@@ -12,18 +12,6 @@ function intro() {
     .fromTo('.hero-fade', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.5);
 }
 
-// Desktop: as the hero leaves, the wall drifts apart in depth.
-function heroDepth() {
-  const tl = gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 } });
-  const push: Record<string, gsap.TweenVars> = {
-    s0: { x: -40, y: -90, rotationY: 10 }, s1: { y: -120 }, s2: { x: 40, y: -90, rotationY: -10 },
-    s3: { x: -80, rotationY: 14 }, s4: { x: 80, rotationY: -14 },
-    s5: { x: -40, y: 60, rotationY: 10 }, s6: { y: 80 }, s7: { x: 40, y: 60, rotationY: -10 },
-  };
-  Object.entries(push).forEach(([k, v]) => tl.to(`.tile.${k}`, { ...v, transformPerspective: 1200, ease: 'none' }, 0));
-  tl.to('.tile-text', { scale: 0.94, opacity: 0.4, ease: 'none' }, 0);
-}
-
 function reveals() {
   document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
     SplitText.create(el, {
@@ -73,7 +61,6 @@ export function initAnimations() {
   intro();
   const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
   fonts.then(() => {
-    gsap.matchMedia().add('(min-width: 1024px)', () => { heroDepth(); });
     reveals();
     ScrollTrigger.refresh();
     let t = 0;

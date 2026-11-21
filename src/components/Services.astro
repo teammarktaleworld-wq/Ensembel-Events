@@ -14,7 +14,7 @@ import Tile from './Tile.astro';
     <div class="panels mt-12" data-reveal>
       {serviceGroups.map((g, i) => (
         <article class={`panel${i === 0 ? ' is-open' : ''}`} data-cat={g.cat}>
-          <div class="panel-media"><Tile m={byId[g.media]} sizes="(min-width: 1024px) 60vw, 100vw" /></div>
+          <div class="panel-media"><Tile m={byId[g.media]} sizes="(min-width: 1024px) 60vw, 100vw" eager={i === 0} /></div>
           <div class="panel-shade" aria-hidden="true"></div>
           <button type="button" id={`panel-btn-${i}`} class="panel-hit" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`panel-${i}`}>
             <span class="panel-num">0{i + 1}</span>

@@ -117,6 +117,7 @@ During a Vercel build, the share image and `og:url` point at the deployment's ow
 - [ ] Stats: 1000+ events delivered, founded 2008, 24+ brands
 - [ ] Wedding services list and copy in `site.ts` (`wedding`), and whether destination weddings are offered
 - [ ] Real wedding photos and videos: the Weddings section is fully illustrated (3D and SVG) because the current site has no wedding imagery
+- [ ] The two wedding photos on the hero grid (`public/media/wedding-mandap-*.webp`, `wedding-aisle-*.webp`) are free Unsplash-licence stand-ins for the demo. Replace them with Ensembel's own wedding photos (same file names, 4:3, 1280×960 and 640×480) before going live.
 - [ ] Photo and video captions in `media.ts`. Some are general ("Conference", "Award night") because the current site does not name those events.
 - [ ] Client logos are copied from the current website. Confirm each brand is happy to be shown.
 - [ ] Rights to use the photos and videos (some look like phone or social-media uploads)

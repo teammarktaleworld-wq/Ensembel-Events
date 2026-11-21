@@ -109,9 +109,10 @@ export function buildFire(at: Vector3, glowTex: Texture) {
     }
   });
 
+  // The light lives outside `group` and is never hidden, only dimmed to 0. Hiding a light changes the scene's
+  // light count, which makes three.js recompile every material mid-scroll (a multi-second freeze).
   const light = new PointLight('#ff8a3d', 0, 0, 2);
-  light.position.set(0, 0.9, 0);
-  group.add(light);
+  light.position.copy(at).add(new Vector3(0, 0.9, 0));
 
   const halo = new GlowPoints();
   halo.add(new Vector3(0, 0.4, 0), 2.6);
@@ -133,7 +134,7 @@ export function buildFire(at: Vector3, glowTex: Texture) {
 
   function update(time: number, dt: number, intensity: number) {
     group.visible = intensity > 0.01;
-    if (!group.visible) return;
+    if (!group.visible) { light.intensity = 0; return; }
     const flicker = 0.85 + 0.15 * Math.sin(time * 17) * Math.sin(time * 7.3 + 1.2);
     mats.forEach((m) => { m.uniforms.uTime.value = time; m.uniforms.uIntensity.value = intensity; });
     light.intensity = intensity * 3.2 * flicker;
@@ -151,7 +152,7 @@ export function buildFire(at: Vector3, glowTex: Texture) {
     emberPos.needsUpdate = true;
   }
 
-  return { group, update };
+  return { group, light, update };
 }
 
 // Falling petals, plus petals resting on the aisle and the mandap steps.

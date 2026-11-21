@@ -89,7 +89,17 @@ const diyas = [250, 340, 860, 950];
       </div>
 
       <div class="wd-couple-art">
-        <svg viewBox="0 0 1200 1000" role="img" aria-labelledby="wd-art-title">
+        <!-- The artwork is drawn as four stacked layers with the same coordinates (back to front): the slowly turning
+             mandala, the static arch, the couple, then the lamps and falling petals. Keeping the moving parts on their
+             own layers means the ~400 gradient flowers of the arch are not redrawn on every animation frame. -->
+        <svg class="wd-layer wd-layer-back" viewBox="0 0 1200 1000" aria-hidden="true">
+          <g class="wd-mandala" fill="none" stroke="#c9952b" stroke-width="1.4" opacity="0.32">
+            <circle cx="600" cy="500" r="440" /><circle cx="600" cy="500" r="380" stroke-dasharray="2 8" /><circle cx="600" cy="500" r="330" />
+            {mandala.map((a) => <ellipse cx="600" cy="100" rx="26" ry="62" transform={`rotate(${a} 600 500)`} />)}
+            {mandala.map((a) => <circle cx="600" cy="150" r="5" transform={`rotate(${a + 7.5} 600 500)`} />)}
+          </g>
+        </svg>
+        <svg class="wd-layer wd-layer-main" viewBox="0 0 1200 1000" role="img" aria-labelledby="wd-art-title">
           <title id="wd-art-title">Illustration: a bride and groom exchange flower garlands under a floral arch</title>
           <defs>
             <linearGradient id="c-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7dc92" /><stop offset="0.5" stop-color="#d6a23e" /><stop offset="1" stop-color="#a8742a" /></linearGradient>
@@ -114,11 +124,6 @@ const diyas = [250, 340, 860, 950];
             <symbol id="bloom" viewBox="-10 -10 20 20" overflow="visible"><circle r="10" /><circle r="5.5" fill="#fff" opacity="0.18" /><circle r="2.4" fill="#000" opacity="0.12" /></symbol>
           </defs>
 
-          <g class="wd-mandala" fill="none" stroke="#c9952b" stroke-width="1.4" opacity="0.32">
-            <circle cx="600" cy="500" r="440" /><circle cx="600" cy="500" r="380" stroke-dasharray="2 8" /><circle cx="600" cy="500" r="330" />
-            {mandala.map((a) => <ellipse cx="600" cy="100" rx="26" ry="62" transform={`rotate(${a} 600 500)`} />)}
-            {mandala.map((a) => <circle cx="600" cy="150" r="5" transform={`rotate(${a + 7.5} 600 500)`} />)}
-          </g>
           <ellipse cx="600" cy="560" rx="360" ry="330" fill="url(#c-glow)" class="wd-glow" />
 
           <g class="wd-arch">
@@ -127,6 +132,8 @@ const diyas = [250, 340, 860, 950];
               ? <g transform={`translate(${f.x} ${f.y}) rotate(${f.leaf})`}><ellipse class="wd-arch-flower" rx="13" ry="5.5" fill="#3e8a3a" /></g>
               : <use href="#bloom" class="wd-arch-flower" x={f.x - f.r} y={f.y - f.r} width={f.r * 2} height={f.r * 2} fill={`url(#f-${f.kind})`} />)}
           </g>
+        </svg>
+        <svg class="wd-layer wd-layer-couple" viewBox="0 0 1200 1000" aria-hidden="true">
 
           <!-- Groom -->
           <g class="wd-groom">
@@ -269,6 +276,8 @@ const diyas = [250, 340, 860, 950];
           <g class="wd-burst wd-burst-g" transform="translate(488 380)">{bursts.map((b) => <circle cx={Math.cos(b.a) * b.d} cy={Math.sin(b.a) * b.d} r="6" fill={b.c} />)}</g>
           <g class="wd-burst wd-burst-b" transform="translate(727 400)">{bursts.map((b) => <circle cx={Math.cos(b.a) * b.d} cy={Math.sin(b.a) * b.d} r="6" fill={b.c} />)}</g>
 
+        </svg>
+        <svg class="wd-layer wd-layer-front" viewBox="0 0 1200 1000" aria-hidden="true">
           <g class="wd-diyas">
             {diyas.map((x) => (
               <g>
@@ -292,35 +301,36 @@ const diyas = [250, 340, 860, 950];
 <style>
   .wd-couple { position: relative; padding: 5rem clamp(1rem, 3vw, 3rem) 0; }
   .wd-couple-card {
-    position: relative; overflow: hidden; display: grid; gap: 1rem; padding: 2.5rem 1.25rem 0; border-radius: 28px; border: 1px solid #f0dcc4;
-    background:
-      radial-gradient(80% 60% at 75% 40%, rgb(255 236 214 / 0.95), transparent 70%),
-      radial-gradient(60% 50% at 10% 100%, rgb(250 214 222 / 0.55), transparent 70%),
-      linear-gradient(160deg, #fffaf2, #fbefe4);
+    position: relative; overflow: hidden; display: grid; gap: 1rem; padding: 2.5rem 1.25rem 0; border-radius: 22px; border: 1px solid var(--color-line);
+    /* Site card style: white on cream with a soft gold glow behind the illustration. */
+    background: radial-gradient(70% 60% at 75% 45%, rgb(247 227 173 / 0.4), transparent 70%), #fffdf9;
   }
-  .wd-shubh { font-family: var(--wd-serif), 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', 'Mangal', serif; font-size: 1.5rem; font-weight: 600; color: var(--wd-gold); letter-spacing: 0.02em; }
-  .wd-couple-title { margin-top: 0.4rem; font-size: clamp(2.4rem, 4.6vw, 4.4rem); }
-  .wd-couple-title :global(em) { font-family: var(--wd-serif); font-style: italic; font-weight: 600; color: var(--wd-maroon); }
+  .wd-shubh { font-family: var(--font-display), 'Nirmala UI', 'Noto Sans Devanagari', 'Kohinoor Devanagari', 'Mangal', sans-serif; font-size: 1.35rem; font-weight: 600; color: var(--c-ink, #8a5d00); letter-spacing: 0.01em; }
+  .wd-couple-title { margin-top: 0.4rem; font-size: clamp(2.25rem, 4.6vw, 4.4rem); }
   .wd-services { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .wd-services li { padding: 0.4rem 0.85rem; border-radius: 999px; border: 1px solid #ecd6bb; background: rgb(255 255 255 / 0.75); font-size: 0.86rem; color: rgb(20 20 22 / 0.78); }
-  .wd-cta { background: var(--wd-maroon); color: #fff; box-shadow: 0 12px 30px -14px var(--wd-maroon); }
-  .wd-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; border-top: 1px solid #ecd6bb; padding-top: 1.25rem; }
+  .wd-services li { padding: 0.4rem 0.85rem; border-radius: 999px; border: 1px solid rgb(20 20 22 / 0.12); background: #fff; font-size: 0.86rem; color: rgb(20 20 22 / 0.78); }
+  .wd-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; border-top: 1px solid var(--color-line); padding-top: 1.25rem; }
   .wd-facts div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.2rem; }
   .wd-facts dt { font-size: 0.78rem; color: rgb(20 20 22 / 0.58); }
-  .wd-facts dd { font-family: var(--font-display); font-weight: 600; font-size: clamp(1rem, 1.6vw, 1.35rem); letter-spacing: -0.02em; color: var(--wd-maroon); }
+  .wd-facts dd { font-family: var(--font-display); font-weight: 600; font-size: clamp(1rem, 1.6vw, 1.35rem); letter-spacing: -0.02em; color: var(--color-ink); }
 
   .wd-couple-art { position: relative; margin: 0 -1.25rem; }
   .wd-couple-art svg { display: block; width: 100%; height: auto; }
+  /* Stacked layers share the first layer's exact box; the animated ones get their own compositing layer. */
+  .wd-couple-art .wd-layer:not(:first-child) { position: absolute; left: 0; top: 0; }
+  .wd-layer-back, .wd-layer-couple, .wd-layer-front { will-change: transform; }
   .wd-step { position: absolute; left: 50%; bottom: 1.2rem; transform: translateX(-50%); display: grid; text-align: center; }
   .wd-step span {
     grid-area: 1 / 1; padding: 0.35rem 0.9rem; border-radius: 999px; background: rgb(255 250 242 / 0.85); backdrop-filter: blur(6px);
-    font-family: var(--wd-serif); font-style: italic; font-weight: 600; font-size: 1.15rem; color: var(--wd-maroon); opacity: 0; white-space: nowrap;
+    font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; color: var(--color-ink); opacity: 0; white-space: nowrap;
   }
   .wd-step span.is-on { opacity: 1; }
 
   .wd-arch-flower, .wd-garland, .wd-burst, .g-kalgi, .g-tail, .b-veil-back, .b-kaleere, .b-jhumka, .wd-flame { transform-box: fill-box; }
   .wd-arch-flower { transform-origin: center; }
-  .wd-mandala { transform-origin: 600px 500px; animation: wd-spin 140s linear infinite; }
+  /* The mandala spins by turning its whole layer (centred on the same point, 600 500), which the GPU does without
+     redrawing anything, instead of rotating the drawing inside the SVG, which forced a redraw every frame. */
+  .wd-layer-back { transform-origin: 50% 50%; animation: wd-spin 140s linear infinite; }
   .g-tail { transform-origin: top center; animation: wd-sway 5s ease-in-out infinite; }
   .g-kalgi { transform-origin: bottom center; animation: wd-sway 3.6s ease-in-out infinite; }
   .b-veil-back { transform-origin: top center; animation: wd-veil 6s ease-in-out infinite; }
@@ -330,6 +340,8 @@ const diyas = [250, 340, 860, 950];
   .wd-diya-glow { animation: wd-glow 1.6s ease-in-out infinite alternate; }
   .wd-petal { animation: wd-fall var(--d) linear var(--delay) infinite; }
   .wd-burst { opacity: 0; }
+  /* Paused while off screen (couple.ts adds .is-live when the illustration is visible). */
+  :global(.js-motion) .wd-couple:not(.is-live) .wd-couple-art :global(*) { animation-play-state: paused; }
   .wd-knot { stroke-dasharray: 260; stroke-dashoffset: 0; }
 
   @keyframes wd-spin { to { transform: rotate(360deg); } }

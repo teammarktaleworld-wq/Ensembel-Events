@@ -481,4 +481,32 @@ export const media: MediaItem[] = [
   }
 ];
 
-export const byId = Object.fromEntries(media.map((m) => [m.id, m])) as Record<string, MediaItem>;
+// Hero-only wedding photos. Kept out of `media` so the gallery below is unchanged.
+// CLIENT TO VERIFY: free Unsplash-licence stand-ins (photo-1587271407850 by Amish Thakkar,
+// photo-1772127822552 by Vidit Goswami). Replace with Ensembel's own wedding photos before going live.
+export const heroWeddings: MediaItem[] = [
+  {
+    id: 'wedding-mandap',
+    type: 'image',
+    src: '/media/wedding-mandap-1280.webp',
+    thumb: '/media/wedding-mandap-640.webp',
+    w: 1280,
+    h: 960,
+    cats: [],
+    caption: 'Wedding ceremony',
+    alt: 'Couple seated in a gold and ivory floral mandap beneath a crystal chandelier',
+  },
+  {
+    id: 'wedding-aisle',
+    type: 'image',
+    src: '/media/wedding-aisle-1280.webp',
+    thumb: '/media/wedding-aisle-640.webp',
+    w: 1280,
+    h: 960,
+    cats: [],
+    caption: 'Wedding mandap',
+    alt: 'Open-air mandap with hanging florals at the end of a white-rose aisle',
+  },
+];
+
+export const byId = Object.fromEntries([...media, ...heroWeddings].map((m) => [m.id, m])) as Record<string, MediaItem>;

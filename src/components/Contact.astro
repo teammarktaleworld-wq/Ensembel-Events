@@ -7,7 +7,7 @@ const bg = byId['almora-c'];
 <section id="contact" class="relative py-20 sm:py-28" aria-labelledby="contact-title">
   <div class="wrap">
     <div class="cta relative overflow-hidden rounded-[28px] bg-ink text-white" data-reveal>
-      <video class="media-fit opacity-45" muted loop playsinline preload="none" poster={bg.thumb} data-src={bg.src} data-autoplay aria-hidden="true"></video>
+      <video class="cta-video" muted loop playsinline preload="none" poster={bg.thumb} data-src={bg.src} data-autoplay aria-hidden="true"></video>
       <div class="absolute inset-0 bg-[radial-gradient(80%_70%_at_50%_100%,var(--accent),transparent_70%)] opacity-35" aria-hidden="true"></div>
       <div class="relative px-6 py-16 text-center sm:px-12 sm:py-24">
         <p class="eyebrow justify-center text-white/75">Plan your event</p>
@@ -32,6 +32,14 @@ const bg = byId['almora-c'];
 
 <style>
   .cta h2 :global(em) { color: var(--accent); }
+  /* The background loop is only 640 × 262, so it is shown close to its real size (never more than 1.25×),
+     centred behind the heading, with edges that fade into the dark card instead of stretching it edge to edge. */
+  .cta-video {
+    position: absolute; left: 50%; top: 50%; width: min(100%, 800px); aspect-ratio: 640 / 262; height: auto;
+    transform: translate(-50%, -50%); object-fit: cover; opacity: 0.5; pointer-events: none;
+    -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+  }
   .cta-ghost {
     display: inline-flex; align-items: center; min-height: 3rem; padding: 0 1.3rem; border-radius: 999px; font-weight: 500; font-size: 0.95rem;
     border: 1px solid rgb(255 255 255 / 0.3); background: rgb(255 255 255 / 0.08); backdrop-filter: blur(8px); transition: border-color 0.3s, background-color 0.3s;

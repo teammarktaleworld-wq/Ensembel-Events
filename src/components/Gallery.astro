@@ -2,7 +2,6 @@
 import { media } from '../data/media';
 import { categories } from '../data/site';
 const items = media.filter((m) => m.id !== 'almora-a' && m.id !== 'almora-c');
-const span = (i: number) => (i % 9 === 0 ? 'g-big' : i % 9 === 4 ? 'g-wide' : i % 9 === 6 ? 'g-tall' : '');
 const play = '<svg width="18" height="18" viewBox="0 0 10 10" aria-hidden="true"><path d="M2.5 1.5l6 3.5-6 3.5z" fill="currentColor"/></svg>';
 ---
 
@@ -20,9 +19,9 @@ const play = '<svg width="18" height="18" viewBox="0 0 10 10" aria-hidden="true"
 
     <ul class="gallery mt-10">
       {items.map((m, i) => (
-        <li class={`g-item ${span(i)}${i >= 12 ? ' is-extra' : ''}`} data-cats={m.cats.join(' ')} data-id={m.id}>
+        <li class={`g-item${i >= 12 ? ' is-extra' : ''}`} data-cats={m.cats.join(' ')} data-id={m.id}>
           <button type="button" class="g-btn" aria-label={`Open: ${m.caption}`}>
-            <img src={m.thumb} srcset={m.type === 'image' ? `${m.thumb} 640w, ${m.src} 1280w` : undefined} sizes="(min-width: 1024px) 25vw, 50vw" alt={m.alt} width={m.w} height={m.h} loading="lazy" decoding="async" class="media-fit" />
+            <img src={m.thumb} srcset={m.type === 'image' ? `${m.thumb} 640w, ${m.src} 1280w` : undefined} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" alt={m.alt} width={m.w} height={m.h} loading="lazy" decoding="async" class="media-fit" />
             {m.type === 'video' && <span class="g-play" set:html={play} />}
             <span class="g-cap">{m.caption}</span>
           </button>
@@ -37,12 +36,14 @@ const play = '<svg width="18" height="18" viewBox="0 0 10 10" aria-hidden="true"
 </section>
 
 <style>
-  .gallery { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 9.5rem; grid-auto-flow: dense; }
+  /* One card size: every photo 4:3, 16px gaps, same corners. Rows are centred, so a short last row
+     (after filtering or "Show all") sits neatly in the middle. Cards are at most ~340px wide, so even the
+     smaller source photos (768px) are shown at or below their real size and stay sharp. */
+  .gallery { --cols: 2; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+  .g-item { flex: 0 0 calc((100% - (var(--cols) - 1) * 16px) / var(--cols)); min-width: 0; }
   .g-item.is-hidden, :global(html.js) .gallery:not(.show-all) .g-item.is-extra { display: none; }
-  .g-big { grid-column: span 2; grid-row: span 2; }
-  .g-wide { grid-column: span 2; }
-  .g-tall { grid-row: span 2; }
-  .g-btn { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 14px; background: var(--color-paper-2); }
+  .g-btn { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 14px; background: var(--color-paper-2); }
+  .g-btn :global(.media-fit) { object-fit: cover; object-position: center; }
   .g-btn :global(.media-fit) { transition: transform 1.2s var(--ease-out); }
   .g-btn:hover :global(.media-fit) { transform: scale(1.06); }
   .g-cap {
@@ -55,6 +56,7 @@ const play = '<svg width="18" height="18" viewBox="0 0 10 10" aria-hidden="true"
     border-radius: 999px; background: rgb(255 255 255 / 0.9); color: var(--color-ink); box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.5);
   }
   @media (hover: none) { .g-cap { opacity: 1; transform: none; } }
-  @media (min-width: 768px) { .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 12rem; } }
-  @media (min-width: 1024px) { .gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 14rem; gap: 10px; } }
+  @media (max-width: 639px) { .g-play { width: 2.75rem; height: 2.75rem; margin: -1.375rem 0 0 -1.375rem; } }
+  @media (min-width: 640px) { .gallery { --cols: 3; } }
+  @media (min-width: 1024px) { .gallery { --cols: 4; max-width: 1440px; margin-inline: auto; } }
 </style>

@@ -86,13 +86,17 @@ export function initWeddings() {
 
   // Colours follow the scroll: each function's palette cross-fades into the next.
   let lastPaint = -1;
+  const painted: Record<string, string> = {};
   const paint = (p: number) => {
     if (Math.abs(p - lastPaint) < 0.0004) return;
     lastPaint = p;
     const { a, b, t } = chapterBlend(p);
+    // Set on the 3D frame only (the only place these colours are used), not the whole section: changing them on
+    // the section restyled the large couple illustration below on every frame.
     for (const key of Object.keys(RGB[0])) {
       const c = RGB[a][key].map((v, k) => Math.round(v + (RGB[b][key][k] - v) * t));
-      root.style.setProperty(`--wd-${key}`, `rgb(${c.join(' ')})`);
+      const val = `rgb(${c.join(' ')})`;
+      if (painted[key] !== val) { painted[key] = val; view.style.setProperty(`--wd-${key}`, val); }
     }
     if (fill) fill.style.transform = `scaleX(${p.toFixed(4)})`;
     root.classList.toggle('wd-started', p > 0.02);
@@ -139,8 +143,11 @@ export function initWeddings() {
       // The card, menu and labels step aside while the page turns
       ui = opening ? smooth(0.45, 1, st.reveal) : 1 - smooth(0.25, 0.85, st.cover);
     }
-    stage.style.setProperty('--wd-ui', ui.toFixed(3));
+    // Only touch the style when the value changes (setting it every frame restyled the whole stage each frame).
+    const uiVal = ui.toFixed(3);
+    if (uiVal !== lastUi) { lastUi = uiVal; stage.style.setProperty('--wd-ui', uiVal); }
   };
+  let lastUi = '';
 
   const setPhera = (n: number) => {
     if (n === phera || !pheraEl || !vowEl) return;
@@ -151,6 +158,19 @@ export function initWeddings() {
   };
 
   const labelIndex = new Map<string, number>();
+  // Where the card and the rail sit inside the 3D frame. They move together with the frame, so this is measured
+  // only when the function changes or the window resizes, not on every frame (that forced a full layout per frame).
+  type Box = { left: number; right: number; top: number; bottom: number };
+  let geom: { width: number; blockers: Box[] } | null = null;
+  let geomChapter = -1;
+  const measure = (ch: number) => {
+    const vr = view.getBoundingClientRect();
+    const blockers = [cards[ch], rail].map((el) => el?.getBoundingClientRect()).filter((r): r is DOMRect => !!r && r.width > 0)
+      .map((r) => ({ left: r.left - vr.left, right: r.right - vr.left, top: r.top - vr.top, bottom: r.bottom - vr.top }));
+    geom = { width: vr.width, blockers };
+    geomChapter = ch;
+  };
+  window.addEventListener('resize', () => { geom = null; });
   const onFrame = (f: FrameInfo) => {
     setChapter(f.chapter);
     paint(f.progress);
@@ -158,15 +178,18 @@ export function initWeddings() {
     if (!labelIndex.size) f.labels.forEach((l, i) => labelIndex.set(l.key, i));
     const settled = Math.abs(f.progress - CHAPTER_AT[f.chapter]) < 0.045 || !motion;
     // Labels give way to the chapter card and the rail rather than sliding under them.
-    const vr = view.getBoundingClientRect();
-    const blockers = [cards[f.chapter], rail].map((el) => el?.getBoundingClientRect()).filter((r): r is DOMRect => !!r && r.width > 0);
+    if (!geom || geomChapter !== f.chapter) measure(f.chapter);
+    const { width, blockers } = geom!;
     const blocked = (x: number, y: number) => blockers.some((r) => x > r.left - 190 && x < r.right + 12 && y > r.top - 28 && y < r.bottom + 28);
     for (const el of labels) {
       const l = f.labels[labelIndex.get(el.dataset.anchor || '') ?? -1];
-      const fits = !!l && l.x > 8 && l.x < vr.width - 190;
-      const on = !!l && l.on && fits && settled && Number(el.dataset.chapter) === f.chapter && !blocked(vr.left + l.x, vr.top + l.y);
-      el.classList.toggle('is-on', on);
-      if (l) el.style.transform = `translate3d(${l.x.toFixed(1)}px, ${l.y.toFixed(1)}px, 0)`;
+      const fits = !!l && l.x > 8 && l.x < width - 190;
+      const on = !!l && l.on && fits && settled && Number(el.dataset.chapter) === f.chapter && !blocked(l.x, l.y);
+      if (el.classList.contains('is-on') !== on) el.classList.toggle('is-on', on);
+      if (l) {
+        const tf = `translate3d(${l.x.toFixed(1)}px, ${l.y.toFixed(1)}px, 0)`;
+        if (el.dataset.tf !== tf) { el.dataset.tf = tf; el.style.transform = tf; }
+      }
     }
   };
 
@@ -183,8 +206,9 @@ export function initWeddings() {
         }
       },
     });
-    gsap.fromTo(view, { scale: 0.9, borderRadius: 28 }, {
-      scale: 1, borderRadius: 0, ease: 'none',
+    // The frame keeps its rounded corners (set in CSS) so the scene sits inside the page like the other sections.
+    gsap.fromTo(view, { scale: 0.9 }, {
+      scale: 1, ease: 'none',
       scrollTrigger: { trigger: journey, start: 'top 85%', end: 'top top', scrub: true },
     });
     paint(0);
@@ -281,6 +305,6 @@ export function initWeddings() {
     if (!e.isIntersecting) return;
     io.disconnect();
     create(pickQuality());
-  }, { rootMargin: '150% 0px' });
+  }, { rootMargin: '250% 0px' }); // early enough for the batched shader warm-up to finish before it is reached
   io.observe(journey);
 }

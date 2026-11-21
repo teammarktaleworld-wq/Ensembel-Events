@@ -8,6 +8,9 @@ export function initCouple() {
   const root = document.querySelector<HTMLElement>('.wd-couple');
   const art = root?.querySelector<HTMLElement>('.wd-couple-art');
   if (!root || !art) return;
+  // The decorative loops (petals, mandala, lamps) run only while the illustration is on screen. Left running
+  // off screen, they made the browser repaint the whole drawing every frame and slowed the rest of the page.
+  new IntersectionObserver(([e]) => root.classList.toggle('is-live', e.isIntersecting), { rootMargin: '10% 0px' }).observe(art);
   const steps = Array.from(root.querySelectorAll<HTMLElement>('.wd-step span'));
   let step = 0;
   const setStep = (i: number) => {

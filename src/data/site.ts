@@ -36,14 +36,25 @@ export const categories: { id: Category; label: string }[] = [
   { id: 'live', label: 'Concerts & shows' },
 ];
 
-// Eight wall slots per category (media ids from media.ts).
+// Twelve category slots on the hero wall (media ids from media.ts). Only sharp, 1000px+ photos are used here;
+// the two wedding photos (`heroWall` below) stay in place whatever category is picked.
 export const wall: Record<Category, string[]> = {
-  all: ['almora-b', 'awards-stage', 'coke-conference', 'track-day', 'droom-band', 'coke-tunnel', 'fintech-summit', 'concert'],
-  conf: ['coke-conference', 'fintech-summit', 'showreel-loop', 'vertiv-udaan', 'healthcare-conclave', 'conference-stage', 'ballroom-conference', 'boardroom'],
-  awards: ['awards-stage', 'droom-band', 'award-night', 'droom-gateway', 'award-presenters', 'art-awards-decor', 'droom-presenters', 'aajtak-sign'],
-  launch: ['track-day', 'coke-tunnel', 'aabhar-letters', 'team-launch', 'aabhar-stage', 'shopclues-induction', 'droom-stage', 'brand-display'],
-  live: ['almora-a', 'concert', 'almora-b', 'droom-band', 'evening-tent', 'droom-crowd', 'almora-c', 'coke-gala'],
+  all: ['almora-b', 'awards-stage', 'conference-hall', 'track-day', 'droom-band', 'droom-stage', 'fintech-summit', 'concert', 'award-night', 'team-launch', 'healthcare-conclave', 'droom-crowd'],
+  conf: ['conference-hall', 'fintech-summit', 'showreel-loop', 'shopclues-edge', 'healthcare-conclave', 'conference-stage', 'ballroom-conference', 'boardroom', 'cybermedia', 'shopclues-induction', 'team-launch', 'award-presenters'],
+  awards: ['awards-stage', 'droom-band', 'award-night', 'droom-gateway', 'award-presenters', 'droom-presenters', 'aajtak-sign', 'droom-crowd', 'droom-stage', 'fintech-summit', 'healthcare-conclave', 'concert'],
+  launch: ['track-day', 'droom-stage', 'team-launch', 'shopclues-induction', 'droom-gateway', 'aajtak-sign', 'shopclues-edge', 'droom-presenters', 'award-night', 'conference-stage', 'ballroom-conference', 'showreel-loop'],
+  live: ['almora-a', 'concert', 'almora-b', 'droom-band', 'droom-stage', 'droom-crowd', 'almora-c', 'droom-gateway', 'award-night', 'awards-stage', 'droom-presenters', 'track-day'],
 };
+
+// Hero photo cells in reading order around the centre card (desktop: 5 columns × 4 rows, card in the middle 3 × 2).
+// 'cat' takes the next category photo; anything else is a fixed media id. The two weddings sit either side
+// of the card, so corporate and wedding work read as one flow.
+export const heroWall = [
+  'cat', 'cat', 'cat', 'cat', 'cat',
+  'wedding-mandap', 'cat',
+  'cat', 'wedding-aisle',
+  'cat', 'cat', 'cat', 'cat', 'cat',
+];
 
 export const stats = [
   { value: 1000, prefix: '', suffix: '+', label: 'Events delivered', count: true },
@@ -81,10 +92,12 @@ export const clients = [
 
 // The client's 12 services (plus government events), grouped into four panels.
 export const serviceGroups: { title: string; cat: Exclude<Category, 'all'>; media: string; items: string[] }[] = [
-  { title: 'Corporate & Government', cat: 'conf', media: 'coke-conference', items: ['Corporate events', 'Conferences', 'Trade & dealer meets', 'Government & institutional events', 'Corporate gifting'] },
+  // Panel backgrounds are shown large, so each uses a sharp 1280px photo (the 768px Coca-Cola photo and the
+  // 640px Almora loop looked blurry stretched to panel size; both still appear in the gallery and showreel).
+  { title: 'Corporate & Government', cat: 'conf', media: 'conference-hall', items:['Corporate events', 'Conferences', 'Trade & dealer meets', 'Government & institutional events', 'Corporate gifting'] },
   { title: 'Media & Awards', cat: 'awards', media: 'awards-stage', items: ['Award shows', 'Press meets', 'Media conclaves'] },
   { title: 'Launches & Activations', cat: 'launch', media: 'track-day', items: ['Product launches', 'Road shows', 'Retail & branding'] },
-  { title: 'Concerts & Experiences', cat: 'live', media: 'almora-b', items: ['Concerts & festivals', 'Theme parties', 'Gaming competitions'] },
+  { title: 'Concerts & Experiences', cat: 'live', media: 'concert', items: ['Concerts & festivals', 'Theme parties', 'Gaming competitions'] },
 ];
 
 export const wedding = {
